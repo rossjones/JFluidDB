@@ -1,0 +1,7 @@
+The next set of things to do:
+
+- Implement proper tests and fix the comments
+- Provide a more general build (ant) - does people still use ant?
+- Handle writes.
+- Use FluidConnector as the internal handler for a set of classes that
+  abstract out the required functionality
