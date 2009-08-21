@@ -1,2 +1,6 @@
 This is a direct port of FluidDB.net ( http://github.com/ntoll/FluidDB.NET/tree/master )
 by Nicholas Tollervey ( http://ntoll.org/ ) from C# to Java.
+
+See the TODO file for the next things to be implemented.
+
+This is still a very early stage, but any help is appreciated in getting this up and running in a more complete fashion.
