@@ -38,6 +38,9 @@ public class FluidConnectorReadTests
         testTopLevelNamespaceReadWithArguments();
         testKnownNamespaceRead();
         testFakeKnownNamespaceRead();
+        
+        testReadUserKnown();
+        testReadUserFake();        
     }
  
     private void testTopLevelNamespaceRead() throws FluidException
@@ -78,6 +81,24 @@ public class FluidConnectorReadTests
         {
             c.Call(Method.GET, "namespaces/womble_dont_exist", "", args);
             TestRunner.Assert( 1==0, "This namespace shouldn't exist");            
+        }
+        catch( FluidException fe )
+        {
+        }
+    }
+
+    private void testReadUserKnown() throws FluidException
+    {
+        String resp = c.Call(Method.GET, "users/rossjones");
+        TestRunner.Assert( resp != null, "Argh, my user account has been deleted");            
+    }
+    
+    private void testReadUserFake() throws FluidException
+    {
+        try
+        {
+            c.Call(Method.GET, "users/noexistyuseraccount");
+            TestRunner.Assert( 1==0, "This user shouldn't exist");            
         }
         catch( FluidException fe )
         {
