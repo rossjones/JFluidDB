@@ -30,10 +30,13 @@ import java.io.*;
 
 public class FluidConnector {
 
-	/* Currently the only URL where fluid db is accessible */
 	public final static String URL = "http://fluiddb.fluidinfo.com/";  
-	
+	public final static String SandboxURL = "http://sandbox.fluidinfo.com/";  
+		
     private boolean _alwaysUseJson = false;
+
+    /* May not be required, although I need to check whether Authenticator is
+       likely to cause problems if it is a global setting */
     private String _username = "";
     private String _password = "";
     private boolean _authSet = false;
@@ -74,11 +77,12 @@ public class FluidConnector {
 	
 
 	/**
-	 * 
-	 * @param m
-	 * @param path
-	 * @return
-     * @throws FluidException
+	 * Calls FluidDB and returns the JSON representation of whatever resource
+	 * we requested.
+	 * @param m The method to use 
+	 * @param path The path of the resource
+	 * @return A JSON string
+     * @throws FluidException If an error occurs, such as no such resource
 	 */
     public String Call(Method m, String path) throws FluidException
     {
@@ -87,12 +91,13 @@ public class FluidConnector {
 
 
     /**
-     * 
-     * @param m
-     * @param path
-     * @param body
-     * @return
-     * @throws FluidException
+   	 * Calls FluidDB and returns the JSON representation of whatever resource
+   	 * we requested.
+   	 * @param m The method to use 
+   	 * @param path The path of the resource
+     * @param body An optional body to send with the request
+     * @return A JSON string
+     * @throws FluidException If an error occurs, such as no such resource
      */
     public String Call(Method m, String path, String body) throws FluidException
     {
@@ -101,13 +106,15 @@ public class FluidConnector {
 
     
     /**
-     * 
-     * @param m
-     * @param path
-     * @param body
-     * @param args
-     * @return
-     * @throws FluidException 
+  	 * Calls FluidDB and returns the JSON representation of whatever resource
+  	 * we requested.
+  	 * @param m The method to use 
+  	 * @param path The path of the resource
+     * @param body An optional body to send with the request
+     * @param args A dictionary of arguments to pass with the request
+     * @return A JSON string
+     * @throws FluidException If an error occurs, such as no such resource or malformed
+     *          arguments
      */
     @SuppressWarnings("deprecation")
 	public String Call(Method m, String path, String body, Hashtable<String, String> args) throws FluidException
@@ -137,13 +144,12 @@ public class FluidConnector {
     		uri.append( StringUtil.join(argList, "&") );
     	}
     	
-    	BufferedReader reader = null;
-    	OutputStream writer = null;
-        HttpURLConnection connection = null;
-        StringBuffer sb = new StringBuffer();
-        String line = "";
+    	BufferedReader    reader      = null;
+    	OutputStream      writer      = null;
+        HttpURLConnection connection  = null;
+        StringBuffer      sb          = new StringBuffer();
+        String            line        = "";
         
-    	 
     	try
     	{
 	 	     connection = (HttpURLConnection)new URL( uri.toString() ).openConnection();
@@ -154,9 +160,8 @@ public class FluidConnector {
 			 connection.setReadTimeout(1000);
 			 connection.setRequestProperty("accept", "application/json");
 			 connection.setRequestProperty("user-agent", "JFluidDB");
-//			 connection.connect();
 			 
-			 if ( body == "" )
+			 if ( body == "" || body == null)
 			 {
 				 connection.setRequestProperty("content-type", "text/plain");
 			 }
@@ -167,26 +172,31 @@ public class FluidConnector {
 				 connection.setRequestProperty("content-type", "application/json");
 				 connection.setRequestProperty("content-length", new Integer(data.length).toString() );
 				 
-				 // write the data
+				 // writes the data, although this is currently a bit naughty when it is a 
+				 // GET request, this is likely to change on the server
 				 writer = connection.getOutputStream();
 				 writer.write(data);
 				 writer.close();
 			 }
-			 			 
+			 
+			 // Read the entire response			 
 			 reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			 while ((line = reader.readLine()) != null)
 			 {
-			     sb.append(line + '\n');
+			     sb.append(line);
 			 }
 			 reader.close();
     	 }
 	   	 catch( FileNotFoundException fnfe )
 		 {
+		     // Resource not found, we might want to add more information to the exception
 	   		 throw new FluidException(fnfe);
 		 }
     	 catch( Exception ee )
     	 {
-    		ee.printStackTrace(); 
+             // DO NOT leave this block in, catch all of the exceptions we can through so 
+             // that we can provide more fine-grained error handling
+	   		 throw new FluidException(ee);
     	 }
     	 finally
     	 {
@@ -199,6 +209,7 @@ public class FluidConnector {
     	return sb.toString();
     }
 
+    // Temporary test hooks
     public static void main(String[] args)
     {
     	FluidConnector fc = new FluidConnector();
