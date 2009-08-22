@@ -18,6 +18,14 @@
     <javac srcdir="${src}" destdir="${build}"/>
   </target>
 
+  <target name="test" depends="compile"
+        description="compile the source and the tests " >
+<!-- Need to add junit to this version of the code -->
+    <javac srcdir="${src}" destdir="${build}"/>
+<!-- Run the tests -->
+  </target>
+
+
   <target name="dist" depends="compile"
         description="generate the distribution" >
     <mkdir dir="${dist}/lib"/>
