@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Ross Jones 
+ * Copyright (c) 2009 Ross Jones and others
  *   - Derived from code by Nicholas H.Tollervey
  *   
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -28,25 +28,51 @@ import java.util.Hashtable;
 import java.util.Vector;
 import java.io.*;
 
+import com.sun.org.apache.xml.internal.security.utils.Base64;
+
 public class FluidConnector {
 
+	/**
+	 * The URL for FluidDB
+	 */
 	public final static String URL = "http://fluiddb.fluidinfo.com/";  
+	
+	/**
+	 * The URL for the Sandbox for development testing
+	 */
 	public final static String SandboxURL = "http://sandbox.fluidinfo.com/";  
+	
+	private String url = URL;
+	
+	/**
+	 * Setter for the URL to use for connecting to FluidDB
+	 * @param url The URL to use for connecting to FluidDB
+	 */
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	/**
+	 * Getter for the URL used for connecting to FluidDB
+	 * @return the URL used to connect to FluidDB
+	 */
+	public String getUrl() {
+		return url;
+	}
 		
-    private boolean _alwaysUseJson = false;
-
-    /* May not be required, although I need to check whether Authenticator is
-       likely to cause problems if it is a global setting */
-    private String _username = "";
-    private String _password = "";
-    private boolean _authSet = false;
-
+	/**
+	 * Use format=json for responses from GET and PUT requests
+	 * 
+	 * (FluidDB defaults to raw payload)
+	 */
+    private boolean alwaysUseJson = false;
+    
     /**
      * Getter for determining if response=json with GET/PUT requests
      * @return true if the connector will always use json
      */
-	public boolean isAlwaysUseJson() {
-		return _alwaysUseJson;
+	public boolean getAlwaysUseJson() {
+		return alwaysUseJson;
 	}
 
     /**
@@ -54,34 +80,54 @@ public class FluidConnector {
      * @return true if the connector will always use json
      */
 	public void setAlwaysUseJson(boolean alwaysUseJson) {
-		this._alwaysUseJson = alwaysUseJson;
+		this.alwaysUseJson = alwaysUseJson;
 	}
 
+    
+
 	/**
-	 * Sets the authentication details for PUT requests
-	 * @param username The username of the account to use
-	 * @param password The password for this user
+	 * The FluidDB username
 	 */
-	public void setAuthDetails( final String username, final String password )
-	{
-	    Authenticator.setDefault(new Authenticator() {
-		    protected PasswordAuthentication getPasswordAuthentication() {
-		        return new PasswordAuthentication (username, password.toCharArray());
-		    }
-		});			 
-		
-		this._username = username;
-		this._password = password;
-		this._authSet = true;
+    private String username = "";
+    
+    /**
+	 * @param username the username to set
+	 */
+	public void setUsername(String username) {
+		this.username = username;
 	}
-	
 
 	/**
-	 * Calls FluidDB and returns the JSON representation of whatever resource
-	 * we requested.
-	 * @param m The method to use 
-	 * @param path The path of the resource
-	 * @return A JSON string
+	 * @return the username
+	 */
+	public String getUsername() {
+		return username;
+	}
+    
+	/**
+	 * The FluidDB password
+	 */
+	private String password = "";
+	
+	/**
+	 * @param password the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * Makes a call to FluidDB
+	 * @param m The type of HTTP method to use 
+	 * @param path The path to call
+	 * @return A string version of the result
      * @throws FluidException If an error occurs, such as no such resource
 	 */
     public String Call(Method m, String path) throws FluidException
@@ -91,12 +137,11 @@ public class FluidConnector {
 
 
     /**
-   	 * Calls FluidDB and returns the JSON representation of whatever resource
-   	 * we requested.
-   	 * @param m The method to use 
-   	 * @param path The path of the resource
+   	 * Makes a call to FluidDB
+   	 * @param m The type of HTTP method to use 
+   	 * @param path The path to call
      * @param body An optional body to send with the request
-     * @return A JSON string
+     * @return A string version of the result
      * @throws FluidException If an error occurs, such as no such resource
      */
     public String Call(Method m, String path, String body) throws FluidException
@@ -106,13 +151,12 @@ public class FluidConnector {
 
     
     /**
-  	 * Calls FluidDB and returns the JSON representation of whatever resource
-  	 * we requested.
-  	 * @param m The method to use 
-  	 * @param path The path of the resource
+  	 * Makes a call to FluidDB
+  	 * @param m The type of HTTP method to use 
+  	 * @param path The path to call
      * @param body An optional body to send with the request
      * @param args A dictionary of arguments to pass with the request
-     * @return A JSON string
+     * @return A string version of the result
      * @throws FluidException If an error occurs, such as no such resource or malformed
      *          arguments
      */
@@ -122,7 +166,7 @@ public class FluidConnector {
     	StringBuffer uri = new StringBuffer();
     	uri.append( URL );
     	uri.append( path);
-    	if ( this._alwaysUseJson)
+    	if ( this.alwaysUseJson)
     	{
     		 if (!args.containsKey("format"))
              {
@@ -160,7 +204,11 @@ public class FluidConnector {
 			 connection.setReadTimeout(1000);
 			 connection.setRequestProperty("accept", "application/json");
 			 connection.setRequestProperty("user-agent", "JFluidDB");
-			 
+			 if(!(this.password == "" & this.username == ""))
+			 {
+				String userpass = this.username+":"+password;
+				connection.setRequestProperty("Authorization", Base64.encode(userpass.getBytes()));
+			 }
 			 if ( body == "" || body == null)
 			 {
 				 connection.setRequestProperty("content-type", "text/plain");
@@ -171,9 +219,6 @@ public class FluidConnector {
 				 
 				 connection.setRequestProperty("content-type", "application/json");
 				 connection.setRequestProperty("content-length", new Integer(data.length).toString() );
-				 
-				 // writes the data, although this is currently a bit naughty when it is a 
-				 // GET request, this is likely to change on the server
 				 writer = connection.getOutputStream();
 				 writer.write(data);
 				 writer.close();
@@ -207,70 +252,6 @@ public class FluidConnector {
     	 }
     	 
     	return sb.toString();
-    }
-
-    // Temporary test hooks
-    public static void main(String[] args)
-    {
-    	FluidConnector fc = new FluidConnector();
-    	String resp = "";
-    	Hashtable<String, String> arguments = new Hashtable<String,String>();
-    	
-    	try
-    	{
-	    	arguments.put("query", "has fluiddb/users/username");
-	    	resp = fc.Call( Method.GET, "objects", "", arguments);
-	    	System.out.println(resp);
-    	}
-    	catch( FluidException fe )
-    	{
-    		
-    	}
-
-    	try
-    	{
-	        // Return an object where the tag “username” from the “fluiddb/users” namespace has the value “ntoll”
-	        arguments.put("query","fluiddb/users/username = \"ntoll\"");
-	        resp = fc.Call(Method.GET, "objects", "", arguments);
-	        System.out.println( resp );
-		}
-		catch( FluidException fe )
-		{
-			
-		}
-
-		try
-		{
-	        resp = fc.Call(Method.GET, "objects/5873e7cc-2a4a-44f7-a00e-7cebf92a7332", "{'showAbout': True}");
-	        System.out.println( resp );
-		}
-		catch( FluidException fe )
-		{
-			
-		}
-
-		try
-		{
-	        resp = fc.Call(Method.GET, "objects/5873e7cc-2a4a-44f7-a00e-7cebf92a7332/fluiddb/users/name");
-	        System.out.println( resp );
-		}
-		catch( FluidException fe )
-		{
-			
-		}
-        
-
-		try
-		{
-	        fc.setAlwaysUseJson( true);
-	        resp = fc.Call(Method.GET, "objects/5873e7cc-2a4a-44f7-a00e-7cebf92a7332/fluiddb/users/name");
-	        System.out.println( resp );
-    	}
-    	catch( FluidException fe )
-    	{
-    		
-    	}
-
     }
 }
 	

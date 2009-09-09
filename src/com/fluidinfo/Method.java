@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Ross Jones 
+ * Copyright (c) 2009 Ross Jones and others
  *   - Derived from code by Nicholas H.Tollervey
  *   
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -26,6 +26,7 @@ public enum Method
 {
     POST,
     GET,
+    HEAD,
     PUT,
     DELETE
 }
