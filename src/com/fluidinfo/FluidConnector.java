@@ -30,17 +30,23 @@ import java.io.*;
 
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
+/**
+ * A base class defining the call methods for all the other FluidDB classes
+ * 
+ * @author rossjones, ntoll
+ *
+ */
 public class FluidConnector {
 
 	/**
 	 * The URL for FluidDB
 	 */
-	public final static String URL = "http://fluiddb.fluidinfo.com/";  
+	public final static String URL = "http://fluiddb.fluidinfo.com";  
 	
 	/**
 	 * The URL for the Sandbox for development testing
 	 */
-	public final static String SandboxURL = "http://sandbox.fluidinfo.com/";  
+	public final static String SandboxURL = "http://sandbox.fluidinfo.com";  
 	
 	private String url = URL;
 	
@@ -81,9 +87,7 @@ public class FluidConnector {
      */
 	public void setAlwaysUseJson(boolean alwaysUseJson) {
 		this.alwaysUseJson = alwaysUseJson;
-	}
-
-    
+	} 
 
 	/**
 	 * The FluidDB username
@@ -129,8 +133,9 @@ public class FluidConnector {
 	 * @param path The path to call
 	 * @return A string version of the result
      * @throws FluidException If an error occurs, such as no such resource
+	 * @throws IOException 
 	 */
-    public String Call(Method m, String path) throws FluidException
+    public FluidResponse Call(Method m, String path) throws FluidException, IOException
     {
     	return this.Call(m, path, "");
     }
@@ -143,8 +148,9 @@ public class FluidConnector {
      * @param body An optional body to send with the request
      * @return A string version of the result
      * @throws FluidException If an error occurs, such as no such resource
+     * @throws IOException 
      */
-    public String Call(Method m, String path, String body) throws FluidException
+    public FluidResponse Call(Method m, String path, String body) throws FluidException, IOException
     {
         return this.Call(m, path, body, new Hashtable<String, String>());
     }
@@ -159,12 +165,12 @@ public class FluidConnector {
      * @return A string version of the result
      * @throws FluidException If an error occurs, such as no such resource or malformed
      *          arguments
+     * @throws IOException Will get thrown if we can't extract the errorStream from the connection
      */
-    @SuppressWarnings("deprecation")
-	public String Call(Method m, String path, String body, Hashtable<String, String> args) throws FluidException
+    public FluidResponse Call(Method m, String path, String body, Hashtable<String, String> args) throws FluidException, IOException
     {
     	StringBuffer uri = new StringBuffer();
-    	uri.append( URL );
+    	uri.append( this.url );
     	uri.append( path);
     	if ( this.alwaysUseJson)
     	{
@@ -176,16 +182,20 @@ public class FluidConnector {
     	
     	if (args.size() > 0)
     	{
+    		try {
     		uri.append("?");
     		Vector<String> argList = new Vector<String>();
     		Enumeration<String> e = args.keys();
     		while( e.hasMoreElements())
     		{
     			String k = e.nextElement();
-    			argList.add( k + "=" + URLEncoder.encode(args.get(k)) );
+    			argList.add( k + "=" + URLEncoder.encode(args.get(k), "UTF-8") );
     		}
     		
     		uri.append( StringUtil.join(argList, "&") );
+    		} catch (Exception e){
+    			throw new FluidException(e);
+    		}
     	}
     	
     	BufferedReader    reader      = null;
@@ -193,21 +203,22 @@ public class FluidConnector {
         HttpURLConnection connection  = null;
         StringBuffer      sb          = new StringBuffer();
         String            line        = "";
+        FluidResponse 	  response	  = null;
         
     	try
     	{
 	 	     connection = (HttpURLConnection)new URL( uri.toString() ).openConnection();
 			 connection.setRequestMethod(  m.toString().toUpperCase() );
-			 if ( m == Method.POST || m == Method.POST )
+			 if ( m == Method.POST || m == Method.PUT )
 				 connection.setDoInput(true);
 			 connection.setDoOutput(true);
-			 connection.setReadTimeout(1000);
+			 //connection.setReadTimeout(5000);
 			 connection.setRequestProperty("accept", "application/json");
 			 connection.setRequestProperty("user-agent", "JFluidDB");
 			 if(!(this.password == "" & this.username == ""))
 			 {
 				String userpass = this.username+":"+password;
-				connection.setRequestProperty("Authorization", Base64.encode(userpass.getBytes()));
+				connection.setRequestProperty("Authorization", "Basic "+Base64.encode(userpass.getBytes()).trim());
 			 }
 			 if ( body == "" || body == null)
 			 {
@@ -231,27 +242,48 @@ public class FluidConnector {
 			     sb.append(line);
 			 }
 			 reader.close();
-    	 }
-	   	 catch( FileNotFoundException fnfe )
-		 {
-		     // Resource not found, we might want to add more information to the exception
-	   		 throw new FluidException(fnfe);
-		 }
-    	 catch( Exception ee )
-    	 {
-             // DO NOT leave this block in, catch all of the exceptions we can through so 
-             // that we can provide more fine-grained error handling
-	   		 throw new FluidException(ee);
-    	 }
-    	 finally
-    	 {
+			 int responseCode = connection.getResponseCode();
+			 String responseMessage = connection.getResponseMessage();
+			 String responseEncoding = "";
+			 if (!connection.getHeaderFields().get("Content-Type").isEmpty()){
+			 	responseEncoding = (String) connection.getHeaderFields().get("Content-Type").get(0);
+			 }
+			 String responseContent = sb.toString();
+			 response = new FluidResponse(responseCode, responseMessage, responseEncoding, responseContent);
+    	} catch (FileNotFoundException fnfe){
+    		return new FluidResponse(connection.getResponseCode(), connection.getResponseMessage(), connection.getContentEncoding(), connection.getURL().toString());
+    	} catch( Exception e ) {
+             // catch all of the other exceptions so that we can provide more 
+    		 // fine-grained error handling for the response object otherwise barf with
+    		 // a FluidException
+    		 InputStream error = connection.getErrorStream();
+    		 if(error==null){
+    			 throw new FluidException(e);
+    		 } else {
+    			 // so we have something useful from the server. Lets build a FluidResponse
+    			 // with what we *do* have
+    			 StringBuffer errorMessage = new StringBuffer();
+    			 BufferedReader errorReader = new BufferedReader(new InputStreamReader(error));
+	    	     while ((line = errorReader.readLine()) != null){
+	    	    	 errorMessage.append(line);
+	    	     }
+	    	     errorReader.close();
+	    	     int responseCode = connection.getResponseCode();
+				 String responseMessage = connection.getResponseMessage();
+				 String responseEncoding = "";
+				 if (!connection.getHeaderFields().get("Content-Type").isEmpty()){
+				 	responseEncoding = (String) connection.getHeaderFields().get("Content-Type").get(0);
+				 }
+				 String responseContent = errorMessage.toString();
+				 response = new FluidResponse(responseCode, responseMessage, responseEncoding, responseContent);
+    		 }
+    	} finally {
     		 connection.disconnect();
     		 reader = null;
     		 writer = null;
     		 connection = null;
-    	 }
-    	 
-    	return sb.toString();
+    	}
+    	return response;
     }
 }
 	

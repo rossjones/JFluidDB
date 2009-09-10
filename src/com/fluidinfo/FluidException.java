@@ -24,6 +24,12 @@ package com.fluidinfo;
 
 public class FluidException extends Exception {
 
+	/**
+	 * Not sure what this is for, but Eclipse seemed to think
+	 * it important to add - ntoll ?!
+	 */
+	private static final long serialVersionUID = 5636817731168339873L;
+
 	public FluidException() {
 	}
 
