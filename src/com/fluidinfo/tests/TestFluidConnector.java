@@ -30,8 +30,8 @@ public class TestFluidConnector extends TestCase {
 	 */
 	String objectID = "";
 	
-	public static String username = "ntoll";
-	public static String password = "aekehivioruosohp";
+	public static String username = "";
+	public static String password = "";
 	
 	public static FluidConnector getFluidConnection() throws FluidException {
 		if (TestFluidConnector.username=="" || TestFluidConnector.password=="")

@@ -5,6 +5,9 @@ See the AUTHORS file for contributors.
 
 See the TODO file for the next things to be implemented.
 
+Unit tests (using jUnit http://www.junit.org/) can be found in the tests directory under 
+src/com/fluidinfo/
+
 This is still a very early stage, but any help is appreciated in getting this up and running in a more 
 complete fashion.
 
