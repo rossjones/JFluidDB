@@ -243,8 +243,10 @@ public class FluidConnector {
 			 int responseCode = connection.getResponseCode();
 			 String responseMessage = connection.getResponseMessage();
 			 String responseEncoding = "";
-			 if (!connection.getHeaderFields().get("Content-Type").isEmpty()){
-			 	responseEncoding = (String) connection.getHeaderFields().get("Content-Type").get(0);
+			 if(connection.getHeaderFields().containsKey("Content-Type")) {
+				 if (!connection.getHeaderFields().get("Content-Type").isEmpty()){
+				 	responseEncoding = (String) connection.getHeaderFields().get("Content-Type").get(0);
+				 }
 			 }
 			 String responseContent = sb.toString();
 			 response = new FluidResponse(responseCode, responseMessage, responseEncoding, responseContent);
