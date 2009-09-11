@@ -8,6 +8,11 @@ See the TODO file for the next things to be implemented.
 Unit tests (using jUnit http://www.junit.org/) can be found in the tests directory under 
 src/com/fluidinfo/
 
+To be able to run the unit tests you need to provide some valid credentials for the sandbox instance
+of FluidDB. You can supply these by putting a credentials.json file in your home directory - the
+test fixture will attempt to read this file and use the username and password defined therein. See the
+credentials.json.example file for an example of the correct contents of this file.
+
 This is still a very early stage, but any help is appreciated in getting this up and running in a more 
 complete fashion.
 

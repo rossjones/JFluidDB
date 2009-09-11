@@ -2,6 +2,7 @@ package com.fluidinfo.tests;
 
 import java.util.Hashtable;
 import java.util.UUID;
+import java.io.*;
 
 import junit.framework.TestCase;
 import org.junit.*;
@@ -28,20 +29,25 @@ public class TestFluidConnector extends TestCase {
 	 * The ID of an object that is known to exist in the database for the 
 	 * purposes of testing
 	 */
-	String objectID = "";
+	private String objectID = "";
 	
-	public static String username = "";
-	public static String password = "";
+	/**
+	 * Gets the temporary object's id being used in the unit tests
+	 * @return the temporary object's id used in the unit tests
+	 */
+	public String getObjectID()
+	{
+		return this.objectID;
+	}
 	
-	public static FluidConnector getFluidConnection() throws FluidException {
-		if (TestFluidConnector.username=="" || TestFluidConnector.password=="")
-		{
-			throw new FluidException("You must supply a username and password in the TestFluidConnector class in order to run the unit tests.");
-		}
+	public String username = "";
+	public String password = "";
+	
+	public static FluidConnector getFluidConnection(String username, String password) throws FluidException {
 		FluidConnector fdb = new FluidConnector();
 		fdb.setUrl(FluidConnector.SandboxURL);
-		fdb.setUsername(TestFluidConnector.username);
-		fdb.setPassword(TestFluidConnector.password);
+		fdb.setUsername(username);
+		fdb.setPassword(password);
 		return fdb;
 	}
 	
@@ -53,7 +59,47 @@ public class TestFluidConnector extends TestCase {
 	
 	@Before
 	protected void setUp() throws FluidException {
-		this.fdb = TestFluidConnector.getFluidConnection();
+		String username = "";
+		String password = "";
+		
+		// Read the credentials.json file found in the home directory of the user 
+		// running the unit tests
+		File file = new File(System.getProperty("user.home"), "credentials.json");
+		StringBuffer contents = new StringBuffer();
+        BufferedReader reader = null;
+        try{
+            reader = new BufferedReader(new FileReader(file.getPath()));
+            String text = null;
+            while ((text = reader.readLine()) != null){
+                contents.append(text).append(System.getProperty("line.separator"));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        try {
+        	JSONObject credentials = TestFluidConnector.getJsonObject(contents.toString());
+        	username = credentials.getString("username");
+        	password = credentials.getString("password");
+        } catch (Exception ex) {
+        	ex.printStackTrace();
+        }
+        
+		if (username=="" || password=="")
+		{
+			throw new FluidException("You must supply a username and password in the TestFluidConnector class in order to run the unit tests.");
+		}
+		this.fdb = TestFluidConnector.getFluidConnection(username, password);
 		// lets make sure we *always* have an object that exists for the purposes of testing
 		String about = "{\"about\": \"Created for the purpose of unit-testing the jFluidDB library\"}";
 		try {
