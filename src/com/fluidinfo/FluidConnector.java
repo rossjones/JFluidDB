@@ -28,8 +28,6 @@ import java.util.Hashtable;
 import java.util.Vector;
 import java.io.*;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
-
 /**
  * A base class defining the call methods for all the other FluidDB classes
  * 
@@ -218,7 +216,7 @@ public class FluidConnector {
 			 if(!(this.password == "" & this.username == ""))
 			 {
 				String userpass = this.username+":"+password;
-				connection.setRequestProperty("Authorization", "Basic "+Base64.encode(userpass.getBytes()).trim());
+				connection.setRequestProperty("Authorization", "Basic "+Base64.encodeBytes(userpass.getBytes()));
 			 }
 			 if ( body == "" || body == null)
 			 {
