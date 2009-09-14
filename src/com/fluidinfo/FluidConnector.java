@@ -137,8 +137,7 @@ public class FluidConnector {
      * @throws FluidException If an error occurs, such as no such resource
 	 * @throws IOException 
 	 */
-    public FluidResponse Call(Method m, String path) throws FluidException, IOException
-    {
+    public FluidResponse Call(Method m, String path) throws FluidException, IOException {
     	return this.Call(m, path, "");
     }
 
@@ -152,8 +151,7 @@ public class FluidConnector {
      * @throws FluidException If an error occurs, such as no such resource
      * @throws IOException 
      */
-    public FluidResponse Call(Method m, String path, String body) throws FluidException, IOException
-    {
+    public FluidResponse Call(Method m, String path, String body) throws FluidException, IOException {
         return this.Call(m, path, body, new Hashtable<String, String>());
     }
 
@@ -169,37 +167,35 @@ public class FluidConnector {
      *          arguments
      * @throws IOException Will get thrown if we can't extract the errorStream from the connection
      */
-    public FluidResponse Call(Method m, String path, String body, Hashtable<String, String> args) throws FluidException, IOException
-    {
+    public FluidResponse Call(Method m, String path, String body, Hashtable<String, String> args) throws FluidException, IOException {
+    	// Build the URI we'll be calling
     	StringBuffer uri = new StringBuffer();
     	uri.append( this.url );
     	uri.append( path);
-    	if ( this.alwaysUseJson)
-    	{
+    	
+    	// Process the query part of the URI
+    	if ( this.alwaysUseJson){
     		 if (!args.containsKey("format"))
              {
     			 args.put("format", "json");
              }
     	}
-    	
-    	if (args.size() > 0)
-    	{
-    		try {
-    		uri.append("?");
-    		Vector<String> argList = new Vector<String>();
-    		Enumeration<String> e = args.keys();
-    		while( e.hasMoreElements())
-    		{
-    			String k = e.nextElement();
-    			argList.add( k + "=" + URLEncoder.encode(args.get(k), "UTF-8") );
-    		}
-    		
-    		uri.append( StringUtil.join(argList, "&") );
+    	if (args.size() > 0){
+    		try{
+	    		uri.append("?");
+	    		Vector<String> argList = new Vector<String>();
+	    		Enumeration<String> e = args.keys();
+	    		while( e.hasMoreElements()){
+	    			String k = e.nextElement();
+	    			argList.add( k + "=" + URLEncoder.encode(args.get(k), "UTF-8") );
+	    		}
+	    		uri.append( StringUtil.join(argList, "&") );
     		} catch (Exception e){
     			throw new FluidException(e);
     		}
     	}
     	
+    	// Declare some vars we'll use in a moment...
     	BufferedReader    reader      = null;
     	OutputStream      writer      = null;
         HttpURLConnection connection  = null;
@@ -207,8 +203,9 @@ public class FluidConnector {
         String            line        = "";
         FluidResponse 	  response	  = null;
         
-    	try
-    	{
+        // Lets build the HTTP request and attempt to get a response
+    	try{
+    		// Basic setup of the connection to FluidDB
 	 	     connection = (HttpURLConnection)new URL( uri.toString() ).openConnection();
 			 connection.setRequestMethod(  m.toString().toUpperCase() );
 			 if ( m == Method.POST || m == Method.PUT )
@@ -217,19 +214,16 @@ public class FluidConnector {
 			 //connection.setReadTimeout(5000);
 			 connection.setRequestProperty("accept", "application/json");
 			 connection.setRequestProperty("user-agent", "JFluidDB");
-			 if(!(this.password == "" & this.username == ""))
-			 {
+			 // Authorization header (if required)
+			 if(!(this.password == "" & this.username == "")){
 				String userpass = this.username+":"+password;
 				connection.setRequestProperty("Authorization", "Basic "+Base64.encodeBytes(userpass.getBytes()));
 			 }
-			 if ( body == "" || body == null)
-			 {
+			 // Content type and body for POST/PUT requests
+			 if ( body == "" || body == null){
 				 connection.setRequestProperty("content-type", "text/plain");
-			 }
-			 else
-			 {
+			 } else {
 				 byte[] data = body.getBytes("US-ASCII");
-				 
 				 connection.setRequestProperty("content-type", "application/json");
 				 connection.setRequestProperty("content-length", new Integer(data.length).toString() );
 				 writer = connection.getOutputStream();
@@ -239,11 +233,11 @@ public class FluidConnector {
 			 
 			 // Read the entire response			 
 			 reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			 while ((line = reader.readLine()) != null)
-			 {
+			 while ((line = reader.readLine()) != null){
 			     sb.append(line);
 			 }
 			 reader.close();
+			 // Grab some useful information from the response
 			 int responseCode = connection.getResponseCode();
 			 String responseMessage = connection.getResponseMessage();
 			 String responseEncoding = "";
@@ -253,8 +247,10 @@ public class FluidConnector {
 				 }
 			 }
 			 String responseContent = sb.toString();
+			 // Build the FluidResponse object
 			 response = new FluidResponse(responseCode, responseMessage, responseEncoding, responseContent);
     	} catch (FileNotFoundException fnfe){
+    		// Build a 404 response
     		return new FluidResponse(connection.getResponseCode(), connection.getResponseMessage(), connection.getContentEncoding(), connection.getURL().toString());
     	} catch( Exception e ) {
              // catch all of the other exceptions so that we can provide more 
@@ -265,7 +261,7 @@ public class FluidConnector {
     			 throw new FluidException(e);
     		 } else {
     			 // so we have something useful from the server. Lets build a FluidResponse
-    			 // with what we *do* have
+    			 // with what we *do* have and hope it comes in useful
     			 StringBuffer errorMessage = new StringBuffer();
     			 BufferedReader errorReader = new BufferedReader(new InputStreamReader(error));
 	    	     while ((line = errorReader.readLine()) != null){
@@ -282,11 +278,13 @@ public class FluidConnector {
 				 response = new FluidResponse(responseCode, responseMessage, responseEncoding, responseContent);
     		 }
     	} finally {
-    		 connection.disconnect();
-    		 reader = null;
-    		 writer = null;
-    		 connection = null;
+    		// Tidy up after ourselves ;-)
+    		connection.disconnect();
+    		reader = null;
+    		writer = null;
+    		connection = null;
     	}
+    	// et voila!
     	return response;
     }
 }
