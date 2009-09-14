@@ -6,7 +6,9 @@ import java.io.*;
 
 import junit.framework.TestCase;
 import org.junit.*;
+
 import com.fluidinfo.*;
+import com.fluidinfo.utils.Method;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;

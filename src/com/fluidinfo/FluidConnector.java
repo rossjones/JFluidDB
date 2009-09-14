@@ -28,6 +28,10 @@ import java.util.Hashtable;
 import java.util.Vector;
 import java.io.*;
 
+import com.fluidinfo.utils.Base64;
+import com.fluidinfo.utils.Method;
+import com.fluidinfo.utils.StringUtil;
+
 /**
  * A base class defining the call methods for all the other FluidDB classes
  * 

@@ -1,4 +1,4 @@
-package com.fluidinfo;
+package com.fluidinfo.utils;
 
 /**
  * Why no Base64 in core Java language. Here's a public domain version by

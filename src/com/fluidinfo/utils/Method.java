@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Ross Jones 
+ * Copyright (c) 2009 Ross Jones and others
  *   - Derived from code by Nicholas H.Tollervey
  *   
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -20,20 +20,13 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.fluidinfo;
+package com.fluidinfo.utils;
 
-import java.util.AbstractCollection;
-import java.util.Iterator;
-
-public class StringUtil {
-
-	public static String join(AbstractCollection<String> s, String delim) {
-	    if (s == null || s.isEmpty()) return "";
-	    
-	    Iterator<String> iter = s.iterator();
-	    StringBuilder sb = new StringBuilder(iter.next());
-	    while( iter.hasNext() )
-	        sb.append(delim).append(iter.next());
-	    return sb.toString();
-	}
+public enum Method
+{
+    POST,
+    GET,
+    HEAD,
+    PUT,
+    DELETE
 }
