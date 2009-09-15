@@ -46,12 +46,12 @@ public abstract class BaseFOM {
 	/**
 	 * The instance's "root" path (namespaces, objects, tags etc)
 	 */
-	private final String rootPath = "";
+	protected String rootPath = "";
 	
 	/**
 	 * The instance's path within FluidDB underneath the root path
 	 */
-	private final String path = "";
+	protected String path = "";
 	
 	/**
 	 * Return's the instance's path in FluidDB (/objects/xyz..../ etc)
@@ -70,6 +70,25 @@ public abstract class BaseFOM {
 	}
 	
 	/**
+	 * Given a path will return the name of the thing referenced (the last item in the path)
+	 * @param path The path to the item
+	 * @return The name of the thing referenced by the path (the last item in the path)
+	 * @throws FOMException If the method cannot determine the name from the path
+	 */
+	protected String GetNameFromPath(String path) throws FOMException{
+		// Test / normalize the path
+		while (path.endsWith("/")){
+			// cut any trailing "/" off the end
+			path=path.substring(0, path.lastIndexOf("/"));
+		}
+		if(path.length()>0) {
+			return path.substring(path.lastIndexOf("/")+1);
+		} else {
+			throw new FOMException("Cannot determine the name from the supplied path.");
+		}
+	}
+	
+	/**
 	 * Used to call to the FluidDB instance
 	 * @param m the HTTP method for the call
 	 * @param body a String representation of the json based body
@@ -78,7 +97,7 @@ public abstract class BaseFOM {
 	 * @throws FluidException
 	 * @throws IOException
 	 */
-	private FluidResponse Call(final Method m, final String body, final Hashtable<String, String> args) throws FluidException, IOException{
+	protected FluidResponse Call(final Method m, final String body, final Hashtable<String, String> args) throws FluidException, IOException{
 		String callPath = this.rootPath+this.path;
 		if(this.path==""|| this.path==null)
 		{

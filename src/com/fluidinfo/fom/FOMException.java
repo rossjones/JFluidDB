@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2009 Nicholas H.Tollervey (ntoll) and others
+ * Copyright (c) 2009 Ross Jones 
+ *   - Derived from code by Nicholas H.Tollervey
  *   
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -21,6 +22,23 @@
  */
 package com.fluidinfo.fom;
 
-public class Object {
+public class FOMException extends Exception {
+
+	private static final long serialVersionUID = 1L;
+	
+	public FOMException() {
+	}
+
+	public FOMException(String message) {
+		super(message);
+	}
+
+	public FOMException(Throwable cause) {
+		super(cause);
+	}
+
+	public FOMException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
 }
