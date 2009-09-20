@@ -252,7 +252,7 @@ public class FluidConnector {
     	} catch (FileNotFoundException fnfe){
     		// Build a 404 response
     		return new FluidResponse(connection.getResponseCode(), connection.getResponseMessage(), connection.getContentEncoding(), connection.getURL().toString());
-    	} catch( Exception e ) {
+    	} catch ( Exception e ) {
              // catch all of the other exceptions so that we can provide more 
     		 // fine-grained error handling for the response object otherwise barf with
     		 // a FluidException

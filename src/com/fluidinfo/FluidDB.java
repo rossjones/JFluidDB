@@ -21,6 +21,10 @@
  */
 package com.fluidinfo;
 
+import java.io.IOException;
+
+import org.json.JSONException;
+
 import com.fluidinfo.fom.*;
 
 /**
@@ -34,7 +38,7 @@ public class FluidDB {
 	/**
 	 * The instance of the connector to use to call to FluidDB
 	 */
-	private FluidConnector fdb = null;
+	protected FluidConnector fdb = null;
 
 	/**
 	 * Represents the URL for FluidDB - defaults to something sensible
@@ -89,26 +93,41 @@ public class FluidDB {
 	}
 	
 	/**
-	 * Returns either the specified namespace or null if it doesn't exist
+	 * Returns specified namespace
 	 * @param path that uniquely identifies the namespace
 	 * @return the specified namespace or null if it doesn't exist
+	 * @throws FOMException 
+	 * @throws JSONException 
+	 * @throws IOException 
+	 * @throws FluidException 
 	 */
-	public Namespace getNamespace(String path){
-		// ToDo: finish this off...
+	public Namespace getNamespace(String path) throws FOMException, FluidException, IOException, JSONException{
+		Namespace childNamespace = new Namespace(this.fdb, "", path);
+		// populate it
+		childNamespace.getItem();
+		return childNamespace;
 	}
 	
 	/**
-	 * Creates a new namespace at the specified path. If the namespace already exists
-	 * it'll return an instance of the existing namespace. Will throw an exception if
-	 * you don't have the appropriate permission to create the namespace.
-	 * 
-	 * @param path the path to the new namespace
-	 * @return an instance representing the newly created namespace
-	 * @throws FluidException - especially if you don't have permission!
+	 * Returns the specified tag
+	 * @param path that uniquely identifies the tag
+	 * @return the specified tag
+	 * @throws FOMException
+	 * @throws FluidException
+	 * @throws IOException
+	 * @throws JSONException
 	 */
-	public Namespace createNamespace(String path) throws FluidException{
-		// ToDo: finish this off
+	public Tag getTag(String path) throws FOMException, FluidException, IOException, JSONException {
+		Tag childTag = new Tag(this.fdb, "", path);
+		childTag.getItem();
+		return childTag;
 	}
 	
-	// ToDo: add get and create methods for the yet-to-be-written Object, Tag and User classes
+	/*public Object getObject(String id) {
+		
+	}
+	
+	public User getUser(String username) {
+		
+	}*/
 }

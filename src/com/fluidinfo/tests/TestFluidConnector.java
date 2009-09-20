@@ -2,7 +2,6 @@ package com.fluidinfo.tests;
 
 import java.util.Hashtable;
 import java.util.UUID;
-import java.io.*;
 
 import junit.framework.TestCase;
 import org.junit.*;
@@ -11,8 +10,6 @@ import com.fluidinfo.*;
 import com.fluidinfo.utils.Method;
 
 import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.json.JSONException;
 
 /**
  * Making use of jUnit to exercise all the possible call types
@@ -45,68 +42,14 @@ public class TestFluidConnector extends TestCase {
 	public String username = "";
 	public String password = "";
 	
-	public static FluidConnector getFluidConnection(String username, String password) throws FluidException {
-		FluidConnector fdb = new FluidConnector();
-		fdb.setUrl(FluidConnector.SandboxURL);
-		fdb.setUsername(username);
-		fdb.setPassword(password);
-		return fdb;
-	}
-	
-	public static JSONObject getJsonObject(String result) throws JSONException{
-		JSONTokener jsonResultTokener = new JSONTokener(result);
-		JSONObject jsonResult = new JSONObject(jsonResultTokener);
-		return jsonResult;
-	}
-	
 	@Before
-	protected void setUp() throws FluidException {
-		String username = "";
-		String password = "";
-		
-		// Read the credentials.json file found in the home directory of the user 
-		// running the unit tests
-		File file = new File(System.getProperty("user.home"), "credentials.json");
-		StringBuffer contents = new StringBuffer();
-        BufferedReader reader = null;
-        try{
-            reader = new BufferedReader(new FileReader(file.getPath()));
-            String text = null;
-            while ((text = reader.readLine()) != null){
-                contents.append(text).append(System.getProperty("line.separator"));
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        
-        try {
-        	JSONObject credentials = TestFluidConnector.getJsonObject(contents.toString());
-        	username = credentials.getString("username");
-        	password = credentials.getString("password");
-        } catch (Exception ex) {
-        	ex.printStackTrace();
-        }
-        
-		if (username=="" || password=="")
-		{
-			throw new FluidException("You must supply a username and password in the TestFluidConnector class in order to run the unit tests.");
-		}
-		this.fdb = TestFluidConnector.getFluidConnection(username, password);
+	protected void setUp() throws Exception {
+		this.fdb = TestUtils.getFluidConnectionWithSettings();
 		// lets make sure we *always* have an object that exists for the purposes of testing
 		String about = "{\"about\": \"Created for the purpose of unit-testing the jFluidDB library\"}";
 		try {
 			FluidResponse result = this.fdb.Call(Method.POST, "/objects", about);
-			JSONObject jsonResult = TestFluidConnector.getJsonObject(result.getResponseContent());
+			JSONObject jsonResult = TestUtils.getJsonObject(result.getResponseContent());
 			this.objectID = jsonResult.getString("id");
 		} catch (Exception e) {
 			throw new FluidException(e);
@@ -125,7 +68,7 @@ public class TestFluidConnector extends TestCase {
 		args.put("query", "has fluiddb/users/username");
 		try {
 			FluidResponse result = this.fdb.Call(Method.GET, "/objects", "", args);
-			JSONObject jsonResult = TestFluidConnector.getJsonObject(result.getResponseContent());
+			JSONObject jsonResult = TestUtils.getJsonObject(result.getResponseContent());
 			assertEquals(true, jsonResult.getJSONArray("ids").length()>0);
 			// A call with no other args
 			// Get the value of the tag "fluiddb/about" for the object with the UUID found
@@ -152,7 +95,7 @@ public class TestFluidConnector extends TestCase {
 			jsonPayload.put("description", "Created for the purpose of unit-testing the JFluidDB client library");
 			jsonPayload.put("name", newNamespaceName);
 			FluidResponse result = this.fdb.Call(Method.POST, "/namespaces/"+this.fdb.getUsername(), jsonPayload.toString());
-			JSONObject jsonResult = TestFluidConnector.getJsonObject(result.getResponseContent());
+			JSONObject jsonResult = TestUtils.getJsonObject(result.getResponseContent());
 			assertEquals(201, result.getResponseCode());
 			assertEquals(true, jsonResult.has("id"));
 			assertEquals(true, jsonResult.has("URI"));
@@ -176,7 +119,7 @@ public class TestFluidConnector extends TestCase {
 			jsonPayload.put("description", "Created for the purpose of unit-testing the JFluidDB client library");
 			jsonPayload.put("name", newNamespaceName);
 			FluidResponse result = this.fdb.Call(Method.POST, "/namespaces/"+this.fdb.getUsername(), jsonPayload.toString());
-			JSONObject jsonResult = TestFluidConnector.getJsonObject(result.getResponseContent());
+			JSONObject jsonResult = TestUtils.getJsonObject(result.getResponseContent());
 			assertEquals(201, result.getResponseCode());
 			assertEquals(true, jsonResult.has("id"));
 			assertEquals(true, jsonResult.has("URI"));
@@ -229,7 +172,7 @@ public class TestFluidConnector extends TestCase {
 			jsonPayload.put("description", "Created for the purpose of unit-testing the JFluidDB client library");
 			jsonPayload.put("name", newNamespaceName);
 			FluidResponse result = this.fdb.Call(Method.POST, "/namespaces/"+this.fdb.getUsername(), jsonPayload.toString());
-			JSONObject jsonResult = TestFluidConnector.getJsonObject(result.getResponseContent());
+			JSONObject jsonResult = TestUtils.getJsonObject(result.getResponseContent());
 			assertEquals(201, result.getResponseCode());
 			assertEquals(true, jsonResult.has("id"));
 			assertEquals(true, jsonResult.has("URI"));
@@ -257,7 +200,7 @@ public class TestFluidConnector extends TestCase {
 			jsonPayload.put("description", "Created for the purpose of unit-testing the JFluidDB client library");
 			jsonPayload.put("name", newNamespaceName);
 			FluidResponse result = this.fdb.Call(Method.POST, "/namespaces/"+this.fdb.getUsername(), jsonPayload.toString());
-			JSONObject jsonResult = TestFluidConnector.getJsonObject(result.getResponseContent());
+			JSONObject jsonResult = TestUtils.getJsonObject(result.getResponseContent());
 			assertEquals(201, result.getResponseCode());
 			assertEquals(true, jsonResult.has("id"));
 			assertEquals(true, jsonResult.has("URI"));
@@ -274,7 +217,7 @@ public class TestFluidConnector extends TestCase {
 			Hashtable<String, String> args = new Hashtable<String, String>();
 			args.put("query", "has fluiddb/users/username");
 			result = this.fdb.Call(Method.GET, "/objects", "", args);
-			jsonResult = TestFluidConnector.getJsonObject(result.getResponseContent());
+			jsonResult = TestUtils.getJsonObject(result.getResponseContent());
 			assertEquals(true, jsonResult.getJSONArray("ids").length()>0);
 		} catch (Exception e) {
 			throw new FluidException(e);
@@ -305,5 +248,10 @@ public class TestFluidConnector extends TestCase {
 		{
 			throw new FluidException(e);
 		}
+	}
+	
+	@Test
+	public void testGetUrl() {
+		assertEquals(FluidConnector.SandboxURL, this.fdb.getUrl());
 	}
 }

@@ -23,17 +23,54 @@
 package com.fluidinfo.utils;
 
 import java.util.AbstractCollection;
-import java.util.Iterator;
 
+/**
+ * Some generic utilities for manipulating strings
+ * @author rossjones, ntoll
+ *
+ */
 public class StringUtil {
+	
+	/**
+	 * Joins an array of strings with the specified delimiter
+	 * @param s The strings to join
+	 * @param delim The delimiter
+	 * @return The joined strings
+	 */
+	public static String join(String[] s, String delim) {
+		if (s == null || s.length==0) return "";
+		StringBuilder sb = new StringBuilder();
+		for(int i=0; i<s.length; i++){
+			sb.append(s[i]).append(delim);
+		}
+		return sb.deleteCharAt(sb.length()-1).toString();
+	}
 
+	/**
+	 * Joins a collection of strings with the specified delimiter
+	 * @param s The strings to join
+	 * @param delim The delimiter
+	 * @return The joined strings
+	 */
 	public static String join(AbstractCollection<String> s, String delim) {
-	    if (s == null || s.isEmpty()) return "";
-	    
-	    Iterator<String> iter = s.iterator();
-	    StringBuilder sb = new StringBuilder(iter.next());
-	    while( iter.hasNext() )
-	        sb.append(delim).append(iter.next());
-	    return sb.toString();
+		return StringUtil.join(s.toArray(new String[0]), delim);
+	}
+	
+	/**
+	 * Given an array of strings returns them joined with a valid URI path separator.
+	 * @param s The strings to join
+	 * @return the resulting path
+	 */
+	public static String URIJoin(String[] s){
+		return StringUtil.join(s, "/").replaceAll("/[/]*", "/");
+	}
+	
+	/**
+	 * Given a collection of strings returns them joined with a valid URI path separator.
+	 * @param s The strings to join
+	 * @return the resulting path
+	 */
+	public static String URIJoin(AbstractCollection<String> s){
+		return StringUtil.URIJoin(s.toArray(new String[0]));
 	}
 }
