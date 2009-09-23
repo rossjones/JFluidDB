@@ -212,7 +212,7 @@ public class FluidConnector {
 				 connection.setDoInput(true);
 			 connection.setDoOutput(true);
 			 //connection.setReadTimeout(5000);
-			 connection.setRequestProperty("accept", "application/json");
+			 connection.setRequestProperty("Accept", "*/*");
 			 connection.setRequestProperty("user-agent", "JFluidDB");
 			 // Authorization header (if required)
 			 if(!(this.password == "" & this.username == "")){
@@ -231,7 +231,7 @@ public class FluidConnector {
 				 writer.close();
 			 }
 			 
-			 // Read the entire response			 
+			 // Read the entire response
 			 reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			 while ((line = reader.readLine()) != null){
 			     sb.append(line);
