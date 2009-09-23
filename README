@@ -1,3 +1,8 @@
++==============================================================================+
+  ntoll's fork is moving a lot faster than the code here, so it may be worth   
+  checking out his fork at http://github.com/ntoll/JFluidDB
++==============================================================================+
+
 This is a direct port of FluidDB.net ( http://github.com/ntoll/FluidDB.NET/tree/master )
 by Nicholas Tollervey ( http://ntoll.org/ ) from C# to Java.
 
