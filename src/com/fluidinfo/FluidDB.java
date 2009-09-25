@@ -123,11 +123,24 @@ public class FluidDB {
 		return childTag;
 	}
 	
+	/**
+	 * Returns the specified user
+	 * @param username for the user in question
+	 * @return the specified user
+	 * @throws FOMException 
+	 * @throws JSONException 
+	 * @throws IOException 
+	 * @throws FluidException 
+	 */
+	public User getUser(String username) throws FOMException, FluidException, IOException, JSONException {
+        User user = new User(this.fdb, "", username);
+        user.getItem();
+        return user;
+    }
+	
 	/*public Object getObject(String id) {
 		
 	}
 	
-	public User getUser(String username) {
-		
-	}*/
+	*/
 }

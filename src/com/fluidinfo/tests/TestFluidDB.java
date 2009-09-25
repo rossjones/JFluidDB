@@ -62,14 +62,18 @@ public class TestFluidDB extends FluidDB{
 		Tag usernameTag = fdb.getTag("fluiddb/users/username");
 		assertEquals("username", usernameTag.getName());
 	}
+    
+    @Test
+    public void testGetUser() throws FOMException, FluidException, IOException, JSONException {
+        FluidDB fdb = new FluidDB(FluidConnector.SandboxURL);
+        assertEquals(FluidConnector.SandboxURL, fdb.getURL());
+        User user = fdb.getUser(this.testUsername);
+        assertEquals(this.testUsername, user.getName());
+        assertEquals(true, user.getId().length()>0);
+    }
 	
 	@Test
 	public void testGetObject() {
-		// TODO: Finish
-	}
-	
-	@Test
-	public void testGetUser() {
 		// TODO: Finish
 	}
 }
