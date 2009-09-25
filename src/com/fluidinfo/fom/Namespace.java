@@ -63,6 +63,7 @@ public class Namespace extends BaseFOM {
 	 * @param fdb The connection to FluidDB
 	 * @param id The id of the namespace in FluidDB
 	 * @param path The path to the namespace in FluidDB
+	 * @throws FOMException
 	 */
 	public Namespace(FluidConnector fdb, String id, String path) throws FOMException {
 		super(fdb, id);

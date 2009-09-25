@@ -115,7 +115,7 @@ public class FluidConnector {
 	 * @throws IOException 
 	 */
     public FluidResponse Call(Method m, String path) throws FluidException, IOException {
-    	return this.Call(m, path, "");
+        return this.Call(m, path, "");
     }
 
 
@@ -145,93 +145,93 @@ public class FluidConnector {
      * @throws IOException Will get thrown if we can't extract the errorStream from the connection
      */
     public FluidResponse Call(Method m, String path, String body, Hashtable<String, String> args) throws FluidException, IOException {
-    	// Build the URI we'll be calling
-    	StringBuffer uri = new StringBuffer();
-    	uri.append( this.url );
-    	uri.append( path);
-    	
-    	if (args.size() > 0){
-    		try{
-	    		uri.append("?");
-	    		Vector<String> argList = new Vector<String>();
-	    		Enumeration<String> e = args.keys();
-	    		while( e.hasMoreElements()){
-	    			String k = e.nextElement();
-	    			argList.add( k + "=" + URLEncoder.encode(args.get(k), "UTF-8") );
-	    		}
-	    		uri.append( StringUtil.join(argList, "&") );
-    		} catch (Exception e){
-    			throw new FluidException(e);
-    		}
-    	}
-    	
-    	// Declare some vars we'll use in a moment...
-    	BufferedReader    reader      = null;
-    	OutputStream      writer      = null;
+        // Build the URI we'll be calling
+        StringBuffer uri = new StringBuffer();
+        uri.append( this.url );
+        uri.append( path);
+        
+        if (args.size() > 0){
+            try{
+                uri.append("?");
+                Vector<String> argList = new Vector<String>();
+                Enumeration<String> e = args.keys();
+                while( e.hasMoreElements()){
+                    String k = e.nextElement();
+                    argList.add( k + "=" + URLEncoder.encode(args.get(k), "UTF-8") );
+                }
+                uri.append( StringUtil.join(argList, "&") );
+            } catch (Exception e){
+                throw new FluidException(e);
+            }
+        }
+        
+        // Declare some vars we'll use in a moment...
+        BufferedReader    reader      = null;
+        OutputStream      writer      = null;
         HttpURLConnection connection  = null;
         StringBuffer      sb          = new StringBuffer();
         String            line        = "";
         FluidResponse 	  response	  = null;
         
         // Lets build the HTTP request and attempt to get a response
-    	try{
-    		// Basic setup of the connection to FluidDB
-	 	     connection = (HttpURLConnection)new URL( uri.toString() ).openConnection();
-			 connection.setRequestMethod(  m.toString().toUpperCase() );
-			 if ( m == Method.POST || m == Method.PUT )
-				 connection.setDoInput(true);
-			 connection.setDoOutput(true);
-			 //connection.setReadTimeout(5000);
-			 connection.setRequestProperty("Accept", "*/*");
-			 connection.setRequestProperty("user-agent", "JFluidDB");
-			 // Authorization header (if required)
-			 if(!(this.password == "" & this.username == "")){
-				String userpass = this.username+":"+password;
-				connection.setRequestProperty("Authorization", "Basic "+Base64.encodeBytes(userpass.getBytes()));
-			 }
-			 // Content type and body for POST/PUT requests
-			 if ( body == "" || body == null){
-				 connection.setRequestProperty("content-type", "text/plain; charset=utf-8");
-			 } else {
-				 byte[] data = body.getBytes("UTF-8");
-				 connection.setRequestProperty("content-type", "application/json; charset=utf-8");
-				 connection.setRequestProperty("content-length", new Integer(data.length).toString() );
-				 writer = connection.getOutputStream();
-				 writer.write(data);
-				 writer.close();
-			 }
-			 
-			 // Read the entire response
-			 reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			 while ((line = reader.readLine()) != null){
-			     sb.append(line);
-			 }
-			 reader.close();
-			 response = this.BuildResponse(connection, sb.toString());		 
-    	} catch (FileNotFoundException fnfe){
-    		// Build a 404 response
-    		response = this.BuildResponse(connection, connection.getURL().toString());
-    	} catch ( IOException e) {
-    		// Build a 401 (usually)
-    		response = this.BuildResponse(connection, connection.getURL().toString());
-    	} catch ( Exception e ) {
+        try{
+            // Basic setup of the connection to FluidDB
+            connection = (HttpURLConnection)new URL( uri.toString() ).openConnection();
+            connection.setRequestMethod(  m.toString().toUpperCase() );
+            if ( m == Method.POST || m == Method.PUT )
+                connection.setDoInput(true);
+            connection.setDoOutput(true);
+            //connection.setReadTimeout(5000);
+            connection.setRequestProperty("Accept", "*/*");
+            connection.setRequestProperty("user-agent", "JFluidDB");
+            // Authorization header (if required)
+            if(!(this.password == "" & this.username == "")){
+                String userpass = this.username+":"+password;
+                connection.setRequestProperty("Authorization", "Basic "+Base64.encodeBytes(userpass.getBytes()));
+            }
+            // Content type and body for POST/PUT requests
+            if ( body == "" || body == null){
+                connection.setRequestProperty("content-type", "text/plain; charset=utf-8");
+            } else {
+                byte[] data = body.getBytes("UTF-8");
+                connection.setRequestProperty("content-type", "application/json; charset=utf-8");
+                connection.setRequestProperty("content-length", new Integer(data.length).toString() );
+                writer = connection.getOutputStream();
+                writer.write(data);
+                writer.close();
+            }
+            
+            // Read the entire response
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            while ((line = reader.readLine()) != null){
+                sb.append(line);
+            }
+            reader.close();
+            response = this.BuildResponse(connection, sb.toString());		 
+        } catch (FileNotFoundException fnfe){
+            // Build a 404 response
+            response = this.BuildResponse(connection, connection.getURL().toString());
+        } catch ( IOException e) {
+            // Build a 401 (usually)
+            response = this.BuildResponse(connection, connection.getURL().toString());
+        } catch ( Exception e ) {
             // catch all of the other exceptions so that we can provide more 
-    		// fine-grained error handling for the response object otherwise barf with
-    		// a FluidException
-    		if(connection.getHeaderFields().containsKey("X-FluidDB-Error-Class")) {
-				response =  this.BuildResponse(connection, "");
-    		} else {
-    			throw new FluidException(e);
-    		}
-    	} finally {
-    		// Tidy up after ourselves ;-)
-    		connection.disconnect();
-    		reader = null;
-    		writer = null;
-    		connection = null;
-    	}
-    	// et voila!
-    	return response;
+            // fine-grained error handling for the response object otherwise barf with
+            // a FluidException
+            if(connection.getHeaderFields().containsKey("X-FluidDB-Error-Class")) {
+                response =  this.BuildResponse(connection, "");
+            } else {
+                throw new FluidException(e);
+            }
+        } finally {
+            // Tidy up after ourselves ;-)
+            connection.disconnect();
+            reader = null;
+            writer = null;
+            connection = null;
+        }
+        // et voila!
+        return response;
     }
 
     /**
@@ -243,14 +243,14 @@ public class FluidConnector {
      * @throws IOException
      */
 	private FluidResponse BuildResponse(HttpURLConnection connection, String content) throws IOException {
-		// Grab some useful information
-		int responseCode = connection.getResponseCode();
-		String responseMessage = connection.getResponseMessage();
-		String responseEncoding = connection.getHeaderField("Content-Type");
-		String responseError = connection.getHeaderField("X-FluidDB-Error-Class");
-		String requestID = connection.getHeaderField("X-FluidDB-Request-Id");
-		// Build the FluidResponse object
-		return new FluidResponse(responseCode, responseMessage, responseEncoding, content, responseError, requestID);
+        // Grab some useful information
+        int responseCode = connection.getResponseCode();
+        String responseMessage = connection.getResponseMessage();
+        String responseEncoding = connection.getHeaderField("Content-Type");
+        String responseError = connection.getHeaderField("X-FluidDB-Error-Class");
+        String requestID = connection.getHeaderField("X-FluidDB-Request-Id");
+        // Build the FluidResponse object
+        return new FluidResponse(responseCode, responseMessage, responseEncoding, content, responseError, requestID);
 	}
 }
 	

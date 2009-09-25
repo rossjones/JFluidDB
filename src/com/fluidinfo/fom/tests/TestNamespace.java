@@ -10,7 +10,7 @@ import com.fluidinfo.tests.TestUtils;
 import java.util.UUID;
 
 /**
- * Exercise the namespace class
+ * Exercise the Namespace class
  * 
  * @author ntoll
  *
