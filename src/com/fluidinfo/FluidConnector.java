@@ -39,90 +39,90 @@ import com.fluidinfo.utils.StringUtil;
  *
  */
 public class FluidConnector {
-
-	/**
-	 * The URL for FluidDB
-	 */
-	public final static String URL = "http://fluiddb.fluidinfo.com";  
-	
-	/**
-	 * The URL for the Sandbox for development testing
-	 */
-	public final static String SandboxURL = "http://sandbox.fluidinfo.com";  
-	
-	private String url = URL;
-	
-	/**
-	 * Setter for the URL to use for connecting to FluidDB
-	 * @param url The URL to use for connecting to FluidDB
-	 */
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	/**
-	 * Getter for the URL used for connecting to FluidDB
-	 * @return the URL used to connect to FluidDB
-	 */
-	public String getUrl() {
-		return url;
-	}
-
-	/**
-	 * The FluidDB username
-	 */
+    
+    /**
+    * The URL for FluidDB
+    */
+    public final static String URL = "http://fluiddb.fluidinfo.com";  
+    
+    /**
+    * The URL for the Sandbox for development testing
+    */
+    public final static String SandboxURL = "http://sandbox.fluidinfo.com";  
+    
+    private String url = URL;
+    
+    /**
+    * Setter for the URL to use for connecting to FluidDB
+    * @param url The URL to use for connecting to FluidDB
+    */
+    public void setUrl(String url) {
+        this.url = url;
+    }
+    
+    /**
+    * Getter for the URL used for connecting to FluidDB
+    * @return the URL used to connect to FluidDB
+    */
+    public String getUrl() {
+        return url;
+    }
+    
+    /**
+    * The FluidDB username
+    */
     private String username = "";
     
     /**
-	 * @param username the username to set
-	 */
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	/**
-	 * @return the username
-	 */
-	public String getUsername() {
-		return username;
-	}
+    * @param username the username to set
+    */
+    public void setUsername(String username) {
+        this.username = username;
+    }
     
-	/**
-	 * The FluidDB password
-	 */
-	private String password = "";
-	
-	/**
-	 * @param password the password to set
-	 */
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	/**
-	 * @return the password
-	 */
-	public String getPassword() {
-		return password;
-	}
-
-	/**
-	 * Makes a call to FluidDB
-	 * @param m The type of HTTP method to use 
-	 * @param path The path to call
-	 * @return A string version of the result
-     * @throws FluidException If an error occurs, such as no such resource
-	 * @throws IOException 
-	 */
+    /**
+    * @return the username
+    */
+    public String getUsername() {
+        return username;
+    }
+    
+    /**
+    * The FluidDB password
+    */
+    private String password = "";
+    
+    /**
+    * @param password the password to set
+    */
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
+    /**
+    * @return the password
+    */
+    public String getPassword() {
+        return password;
+    }
+    
+    /**
+    * Makes a call to FluidDB
+    * @param m The type of HTTP method to use 
+    * @param path The path to call
+    * @return A string version of the result
+    * @throws FluidException If an error occurs, such as no such resource
+    * @throws IOException 
+    */
     public FluidResponse Call(Method m, String path) throws FluidException, IOException {
         return this.Call(m, path, "");
     }
 
 
     /**
-   	 * Makes a call to FluidDB
-   	 * @param m The type of HTTP method to use 
-   	 * @param path The path to call
+     * Makes a call to FluidDB
+     * @param m The type of HTTP method to use 
+     * @param path The path to call
      * @param body An optional body to send with the request
      * @return A string version of the result
      * @throws FluidException If an error occurs, such as no such resource
@@ -242,7 +242,7 @@ public class FluidConnector {
      * @return a new FluidDBResponse instance
      * @throws IOException
      */
-	private FluidResponse BuildResponse(HttpURLConnection connection, String content) throws IOException {
+    private FluidResponse BuildResponse(HttpURLConnection connection, String content) throws IOException {
         // Grab some useful information
         int responseCode = connection.getResponseCode();
         String responseMessage = connection.getResponseMessage();
@@ -251,6 +251,6 @@ public class FluidConnector {
         String requestID = connection.getHeaderField("X-FluidDB-Request-Id");
         // Build the FluidResponse object
         return new FluidResponse(responseCode, responseMessage, responseEncoding, content, responseError, requestID);
-	}
+    }
 }
 	
