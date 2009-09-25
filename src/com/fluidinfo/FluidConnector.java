@@ -134,14 +134,14 @@ public class FluidConnector {
 
     
     /**
-  	 * Makes a call to FluidDB
-  	 * @param m The type of HTTP method to use 
-  	 * @param path The path to call
+     * Makes a call to FluidDB
+     * @param m The type of HTTP method to use 
+     * @param path The path to call
      * @param body An optional body to send with the request
      * @param args A dictionary of arguments to pass with the request
      * @return A string version of the result
      * @throws FluidException If an error occurs, such as no such resource or malformed
-     *          arguments
+     *         arguments
      * @throws IOException Will get thrown if we can't extract the errorStream from the connection
      */
     public FluidResponse Call(Method m, String path, String body, Hashtable<String, String> args) throws FluidException, IOException {
