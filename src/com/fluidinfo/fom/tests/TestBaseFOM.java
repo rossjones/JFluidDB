@@ -136,7 +136,7 @@ public class TestBaseFOM extends BaseFOM {
 		try {
 			this.Call(Method.PUT, 204, body.toString());
 		} catch (FluidException ex) {
-			assertEquals("FluidDB returned the following error: 401 (Unauthorized) TPathPermissionDenied", ex.getMessage());
+			assertEquals(true, ex.getMessage().startsWith("FluidDB returned the following error: 401 (Unauthorized) TPathPermissionDenied - with the request ID: "));
 		}
 	}
 

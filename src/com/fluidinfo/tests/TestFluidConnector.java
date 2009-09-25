@@ -74,10 +74,9 @@ public class TestFluidConnector extends TestCase {
 			// Get the value of the tag "fluiddb/about" for the object with the UUID found
 			// in this.objectID
 			result = this.fdb.Call(Method.GET, "/objects/"+this.objectID+"/fluiddb/about");
-			assertEquals("Created for the purpose of unit-testing the jFluidDB library", result.getResponseContent());
+			assertEquals("\"Created for the purpose of unit-testing the jFluidDB library\"", result.getResponseContent());
 			assertEquals(200, result.getResponseCode());
-		} catch (Exception e)
-		{
+		} catch (Exception e) {
 			throw new FluidException(e);
 		}
 	}
@@ -220,32 +219,6 @@ public class TestFluidConnector extends TestCase {
 			jsonResult = TestUtils.getJsonObject(result.getResponseContent());
 			assertEquals(true, jsonResult.getJSONArray("ids").length()>0);
 		} catch (Exception e) {
-			throw new FluidException(e);
-		}
-	}
-	
-	/**
-	 * For GET and PUT, make sure we get back json (if specified)
-	 * @throws FluidException 
-	 */
-	@Test 
-	public void testAlwaysUseJson() throws FluidException
-	{
-		try {
-			// GET without json
-			assertEquals(false, this.fdb.getAlwaysUseJson());
-			FluidResponse result = this.fdb.Call(Method.GET, "/objects/"+this.objectID+"/fluiddb/about");
-			assertEquals(200, result.getResponseCode());
-			assertEquals("text/plain; charset=UTF-8", result.getResponseContentType());
-			assertEquals("Created for the purpose of unit-testing the jFluidDB library", result.getResponseContent());
-			// GET (with json)
-			this.fdb.setAlwaysUseJson(true);
-			result = this.fdb.Call(Method.GET, "/objects/"+this.objectID+"/fluiddb/about");
-			assertEquals(200, result.getResponseCode());
-			assertEquals("application/json", result.getResponseContentType());
-			assertEquals("{\"value\": \"Created for the purpose of unit-testing the jFluidDB library\"}", result.getResponseContent());
-		} catch (Exception e)
-		{
 			throw new FluidException(e);
 		}
 	}

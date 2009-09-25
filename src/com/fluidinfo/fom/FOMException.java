@@ -27,6 +27,7 @@ public class FOMException extends Exception {
 	private static final long serialVersionUID = 1L;
 	
 	public FOMException() {
+		super();
 	}
 
 	public FOMException(String message) {

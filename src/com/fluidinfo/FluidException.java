@@ -31,6 +31,7 @@ public class FluidException extends Exception {
 	private static final long serialVersionUID = 5636817731168339873L;
 
 	public FluidException() {
+		super();
 	}
 
 	public FluidException(String message) {

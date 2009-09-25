@@ -167,20 +167,15 @@ public abstract class BaseFOM implements FOMInterface {
 		} else {
 			// Hmmm... we didn't get the response we were expecting so build as helpful
 			// an exception as possible.
-			String errorMessage;
-			try {
-				JSONObject jsonError = this.getJsonObject(response);
-				errorMessage = jsonError.getString("errorClass");
-			} catch(Exception ex) {
-				errorMessage = "";
-			}
 			StringBuilder sb = new StringBuilder();
 			sb.append("FluidDB returned the following error: ");
 			sb.append(response.getResponseCode());
 			sb.append(" (");
 			sb.append(response.getResponseMessage());
 			sb.append(") ");
-			sb.append(errorMessage);
+			sb.append(response.getResponseError());
+			sb.append(" - with the request ID: ");
+			sb.append(response.getErrorRequestID());
 			throw new FluidException(sb.toString().trim());
 		}
 	}

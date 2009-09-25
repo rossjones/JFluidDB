@@ -67,29 +67,6 @@ public class FluidConnector {
 	public String getUrl() {
 		return url;
 	}
-		
-	/**
-	 * Use format=json for responses from GET and PUT requests
-	 * 
-	 * (FluidDB defaults to raw payload)
-	 */
-    private boolean alwaysUseJson = false;
-    
-    /**
-     * Getter for determining if response=json with GET/PUT requests
-     * @return true if the connector will always use json
-     */
-	public boolean getAlwaysUseJson() {
-		return alwaysUseJson;
-	}
-
-    /**
-     * If set then response=json will be used when doing GET/PUT requests 
-     * @return true if the connector will always use json
-     */
-	public void setAlwaysUseJson(boolean alwaysUseJson) {
-		this.alwaysUseJson = alwaysUseJson;
-	} 
 
 	/**
 	 * The FluidDB username
@@ -173,13 +150,6 @@ public class FluidConnector {
     	uri.append( this.url );
     	uri.append( path);
     	
-    	// Process the query part of the URI
-    	if ( this.alwaysUseJson){
-    		 if (!args.containsKey("format"))
-             {
-    			 args.put("format", "json");
-             }
-    	}
     	if (args.size() > 0){
     		try{
 	    		uri.append("?");
@@ -221,10 +191,10 @@ public class FluidConnector {
 			 }
 			 // Content type and body for POST/PUT requests
 			 if ( body == "" || body == null){
-				 connection.setRequestProperty("content-type", "text/plain");
+				 connection.setRequestProperty("content-type", "text/plain; charset=utf-8");
 			 } else {
-				 byte[] data = body.getBytes("US-ASCII");
-				 connection.setRequestProperty("content-type", "application/json");
+				 byte[] data = body.getBytes("UTF-8");
+				 connection.setRequestProperty("content-type", "application/json; charset=utf-8");
 				 connection.setRequestProperty("content-length", new Integer(data.length).toString() );
 				 writer = connection.getOutputStream();
 				 writer.write(data);
@@ -237,46 +207,22 @@ public class FluidConnector {
 			     sb.append(line);
 			 }
 			 reader.close();
-			 // Grab some useful information from the response
-			 int responseCode = connection.getResponseCode();
-			 String responseMessage = connection.getResponseMessage();
-			 String responseEncoding = "";
-			 if(connection.getHeaderFields().containsKey("Content-Type")) {
-				 if (!connection.getHeaderFields().get("Content-Type").isEmpty()){
-				 	responseEncoding = (String) connection.getHeaderFields().get("Content-Type").get(0);
-				 }
-			 }
-			 String responseContent = sb.toString();
-			 // Build the FluidResponse object
-			 response = new FluidResponse(responseCode, responseMessage, responseEncoding, responseContent);
+			 response = this.BuildResponse(connection, sb.toString());		 
     	} catch (FileNotFoundException fnfe){
     		// Build a 404 response
-    		return new FluidResponse(connection.getResponseCode(), connection.getResponseMessage(), connection.getContentEncoding(), connection.getURL().toString());
+    		response = this.BuildResponse(connection, connection.getURL().toString());
+    	} catch ( IOException e) {
+    		// Build a 401 (usually)
+    		response = this.BuildResponse(connection, connection.getURL().toString());
     	} catch ( Exception e ) {
-             // catch all of the other exceptions so that we can provide more 
-    		 // fine-grained error handling for the response object otherwise barf with
-    		 // a FluidException
-    		 InputStream error = connection.getErrorStream();
-    		 if(error==null){
-    			 throw new FluidException(e);
-    		 } else {
-    			 // so we have something useful from the server. Lets build a FluidResponse
-    			 // with what we *do* have and hope it comes in useful
-    			 StringBuffer errorMessage = new StringBuffer();
-    			 BufferedReader errorReader = new BufferedReader(new InputStreamReader(error));
-	    	     while ((line = errorReader.readLine()) != null){
-	    	    	 errorMessage.append(line);
-	    	     }
-	    	     errorReader.close();
-	    	     int responseCode = connection.getResponseCode();
-				 String responseMessage = connection.getResponseMessage();
-				 String responseEncoding = "";
-				 if (!connection.getHeaderFields().get("Content-Type").isEmpty()){
-				 	responseEncoding = (String) connection.getHeaderFields().get("Content-Type").get(0);
-				 }
-				 String responseContent = errorMessage.toString();
-				 response = new FluidResponse(responseCode, responseMessage, responseEncoding, responseContent);
-    		 }
+            // catch all of the other exceptions so that we can provide more 
+    		// fine-grained error handling for the response object otherwise barf with
+    		// a FluidException
+    		if(connection.getHeaderFields().containsKey("X-FluidDB-Error-Class")) {
+				response =  this.BuildResponse(connection, "");
+    		} else {
+    			throw new FluidException(e);
+    		}
     	} finally {
     		// Tidy up after ourselves ;-)
     		connection.disconnect();
@@ -287,5 +233,24 @@ public class FluidConnector {
     	// et voila!
     	return response;
     }
+
+    /**
+     * Utility method to build new FluidDBResponse instances given a connection and some content
+     * 
+     * @param connection The connection made to FluidDB
+     * @param content The payload of the response
+     * @return a new FluidDBResponse instance
+     * @throws IOException
+     */
+	private FluidResponse BuildResponse(HttpURLConnection connection, String content) throws IOException {
+		// Grab some useful information
+		int responseCode = connection.getResponseCode();
+		String responseMessage = connection.getResponseMessage();
+		String responseEncoding = connection.getHeaderField("Content-Type");
+		String responseError = connection.getHeaderField("X-FluidDB-Error-Class");
+		String requestID = connection.getHeaderField("X-FluidDB-Request-Id");
+		// Build the FluidResponse object
+		return new FluidResponse(responseCode, responseMessage, responseEncoding, content, responseError, requestID);
+	}
 }
 	

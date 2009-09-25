@@ -34,6 +34,8 @@ public class FluidResponse {
 	private String responseMessage;
 	private String responseContentType;
 	private String responseContent;
+	private String responseError;
+	private String responseRequestID;
 	
 	/**
 	 * Gets the HTTP response code returned from FluidDB (e.g. 200, 404)
@@ -72,6 +74,24 @@ public class FluidResponse {
 	}
 	
 	/**
+	 * The error message returned by FluidDB
+	 * 
+	 * @return the error message returned by FluidDB
+	 */
+	public String getResponseError(){
+		return this.responseError;
+	}
+	
+	/**
+	 * The request ID that caused the error - useful for feedback and reporting bugs to FluidInfo
+	 * 
+	 * @return the ID of the request that caused the error
+	 */
+	public String getErrorRequestID(){
+		return this.responseRequestID;
+	}
+	
+	/**
 	 * Constructor
 	 * 
 	 * @param ResponseCode - the HTTP response code returned from FluidDB (e.g. 200, 404)
@@ -80,9 +100,25 @@ public class FluidResponse {
 	 * @param ResponseContent - the raw content of the response from FluidDB
 	 */
 	public FluidResponse(int ResponseCode, String ResponseMessage, String ResponseContentType, String ResponseContent){
+		this(ResponseCode, ResponseMessage, ResponseContentType, ResponseContent, null, null);
+	}
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param ResponseCode - the HTTP response code returned from FluidDB (e.g. 200, 404)
+	 * @param ResponseMessage - the response message returned from FluidDB (e.g. OK, Not Found etc)
+	 * @param ResponseContentType - the content-type returned from FluidDB (usually "application/json")
+	 * @param ResponseContent - the raw content of the response from FluidDB
+	 * @param ResponseError - the 
+	 * @param RequestID
+	 */
+	public FluidResponse(int ResponseCode, String ResponseMessage, String ResponseContentType, String ResponseContent, String ResponseError, String RequestID) {
 		this.responseCode=ResponseCode;
 		this.responseMessage=ResponseMessage;
 		this.responseContentType=ResponseContentType;
 		this.responseContent=ResponseContent;
+		this.responseError=ResponseError;
+		this.responseRequestID=RequestID;
 	}
 }

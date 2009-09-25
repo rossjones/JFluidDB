@@ -5,7 +5,7 @@ See the AUTHORS file for contributors.
 
 See the TODO file for the next things to be implemented.
 
-Unit tests (using jUnit http://www.junit.org/) can be found in the tests directory under 
+Unit tests (using jUnit http://www.junit.org/) can be found in the test directories under 
 src/com/fluidinfo/
 
 To be able to run the unit tests you need to provide some valid credentials for the sandbox instance
@@ -19,8 +19,7 @@ complete fashion.
 Currently we have a class (FluidConnector) that facilitates interaction with FluidDB, a suite of tests
 for this class and some other helper classes.
 
-This is the minimum required for interaction with FluidDB. In the coming days I (ntoll) will add higher
-level abstractions in the form of helper classes to make the API a lot easier to use. These changes will
-also be reflected in the .NET version of this library.
+I (ntoll) have partially completed a FOM (Fluid-Object-Mapper) to sit on top of the FluidConnector 
+class. This should be finished soon.
 
 All feedback, patches, bug-reports are most welcome!
