@@ -24,14 +24,14 @@ package com.fluidinfo.fom;
 import java.io.IOException;
 import java.util.Hashtable;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.fluidinfo.FluidConnector;
 import com.fluidinfo.FluidException;
 import com.fluidinfo.FluidResponse;
 import com.fluidinfo.utils.Method;
 import com.fluidinfo.utils.StringUtil;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * See http://doc.fluidinfo.com/fluidDB/namespaces.html
@@ -82,8 +82,8 @@ public class Namespace extends BaseFOM {
 		JSONObject jsonResult = this.getJsonObject(response);
 		this.id = jsonResult.getString("id");
 		this.description = jsonResult.getString("description");
-		this.namespaces = this.getStringArrayFromJSONArray(jsonResult.getJSONArray("namespaceNames"));
-		this.tags = this.getStringArrayFromJSONArray(jsonResult.getJSONArray("tagNames"));
+		this.namespaces = StringUtil.getStringArrayFromJSONArray(jsonResult.getJSONArray("namespaceNames"));
+		this.tags = StringUtil.getStringArrayFromJSONArray(jsonResult.getJSONArray("tagNames"));
 	}
 	
 	/**
@@ -140,7 +140,7 @@ public class Namespace extends BaseFOM {
 		jsonPayload.put("description", description);
 		jsonPayload.put("name", name);
 		FluidResponse response = this.Call(Method.POST, 201, jsonPayload.toString());
-		JSONObject jsonResult = this.getJsonObject(response.getResponseContent());
+		JSONObject jsonResult = StringUtil.getJsonObjectFromString(response.getResponseContent());
 		String newId = jsonResult.getString("id");
 		String[] newPath = {this.path, name};
 		Namespace newNamespace = new Namespace(this.fdb, newId, StringUtil.URIJoin(newPath));
@@ -176,7 +176,7 @@ public class Namespace extends BaseFOM {
 		String[] tagPath = {"/tags", this.path};
 		String tagPathURI = StringUtil.URIJoin(tagPath);
 		FluidResponse response = this.Call(Method.POST, 201, jsonPayload.toString(), new Hashtable<String, String>(), tagPathURI);
-		JSONObject jsonResult = this.getJsonObject(response.getResponseContent());
+		JSONObject jsonResult = StringUtil.getJsonObjectFromString(response.getResponseContent());
 		String newId = jsonResult.getString("id");
 		String[] tagFullPath = {this.path, name};
 		String tagFullURI = StringUtil.URIJoin(tagFullPath);

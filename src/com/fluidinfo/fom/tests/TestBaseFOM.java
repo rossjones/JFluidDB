@@ -73,13 +73,9 @@ public class TestBaseFOM extends BaseFOM {
 	
 	@Test
 	public void testGetJsonObjectWorks() throws JSONException, FOMException {
-		// With a single String
 		String jsonInput = "{ \"foo\": \"bar\"}";
-		JSONObject jObj = this.getJsonObject(jsonInput);
-		assertEquals("bar", jObj.get("foo"));
-		// With a FluidResponse
 		FluidResponse fR = new FluidResponse(200, "", "application/json", jsonInput);
-		jObj = this.getJsonObject(fR);
+		JSONObject jObj = this.getJsonObject(fR);
 		assertEquals("bar", jObj.get("foo"));
 	}
 	
@@ -92,16 +88,6 @@ public class TestBaseFOM extends BaseFOM {
 	}
 	
 	@Test
-	public void testGetStringArrayFromJSONArray() throws JSONException {
-		String jsonInput = "{\"foo\": [ \"bar\", \"baz\"]}";
-		JSONObject jObj = this.getJsonObject(jsonInput);
-		String[] result = this.getStringArrayFromJSONArray(jObj.getJSONArray("foo"));
-		assertEquals(2, result.length);
-		assertEquals("bar", result[0]);
-		assertEquals("baz", result[1]);
-	}
-	
-	@Test
 	public void testCall() throws Exception {
 		this.fdb = TestUtils.getFluidConnectionWithSettings();
 		// lets get the information about the current user - shortest call signature
@@ -111,7 +97,7 @@ public class TestBaseFOM extends BaseFOM {
 		assertEquals(200, r.getResponseCode());
 		// lets send a body in a put to the user's root namespace
 		this.rootPath="/namespaces";
-		JSONObject body = this.getJsonObject("{\"description\":\"a test\"}");
+		JSONObject body = StringUtil.getJsonObjectFromString("{\"description\":\"a test\"}");
 		r = this.Call(Method.PUT, 204, body.toString());
 		// lets get the user's root namespace's information  - call sig includes the Hashtable of args
 		Hashtable<String, String> args = new Hashtable<String, String>();
@@ -132,7 +118,7 @@ public class TestBaseFOM extends BaseFOM {
 		this.rootPath="/namespaces";
 		this.path="fluiddb"; // we don't have permissions for this namespace - it's the system account
 		// Lets try to update the system account's namespace to throw an exception
-		JSONObject body = this.getJsonObject("{\"description\":\"a test\"}");
+		JSONObject body = StringUtil.getJsonObjectFromString("{\"description\":\"a test\"}");
 		try {
 			this.Call(Method.PUT, 204, body.toString());
 		} catch (FluidException ex) {

@@ -1,4 +1,5 @@
 The next set of things to do:
 
-- Finish the FOM - Objects and Users
-- Attempt to improve the code coverage of the unit tests (currently at 71.3%)
+- Finish the FOM - permissions and policies
+- Implement getting/setting opaque tag values
+- Attempt to improve the code coverage of the unit tests (currently at 92.7%)

@@ -27,8 +27,6 @@ import java.util.Vector;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
-import org.json.JSONArray;
 
 import com.fluidinfo.*;
 import com.fluidinfo.utils.*;
@@ -161,7 +159,37 @@ public abstract class BaseFOM implements FOMInterface {
 	 * @throws IOException
 	 */
 	protected FluidResponse Call(final Method m, int expectedReturnCode, final String body, final Hashtable<String, String> args, String callPath) throws FluidException, IOException{
-		FluidResponse response = this.fdb.Call(m, callPath, body, args);
+	    return this.Call(m, expectedReturnCode, body, args, callPath, "application/json; charset=utf-8");
+	}
+	
+	/**
+	 * Used to call to the FluidDB instance
+	 * @param m the HTTP method for the call
+	 * @param expectedReturnCode the expected return code for a successful call
+	 * @param body a String representation of the json based body
+	 * @param content_type the Content-Type header to be sent
+	 * @return the result from FluidDB
+	 * @throws FluidException
+	 * @throws IOException
+	 */
+	protected FluidResponse Call(final Method m, int expectedReturnCode, final String body, String callPath, String content_type) throws FluidException, IOException{
+	    return this.Call(m, expectedReturnCode, body, new Hashtable<String, String>(), callPath, content_type);
+    }
+	
+	/**
+	 * Used to call to the FluidDB instance
+	 * @param m the HTTP method for the call
+	 * @param expectedReturnCode the expected return code for a successful call
+	 * @param body a String representation of the json based body
+	 * @param args an argument dictionary to append to the end of the call URL
+	 * @param callPath the URI to call in FluidDB
+	 * @param content_type the Content-Type header to be sent
+     * @return the result from FluidDB
+	 * @throws FluidException
+	 * @throws IOException
+	 */
+	protected FluidResponse Call(final Method m, int expectedReturnCode, final String body, final Hashtable<String, String> args, String callPath, String content_type) throws FluidException, IOException{
+		FluidResponse response = this.fdb.Call(m, callPath, body, args, content_type);
 		if(response.getResponseCode()==expectedReturnCode){
 			return response;
 		} else {
@@ -190,35 +218,9 @@ public abstract class BaseFOM implements FOMInterface {
 	protected JSONObject getJsonObject(FluidResponse response) throws FOMException, JSONException {
 		String contentType = response.getResponseContentType();
 		if(contentType.equals("application/json")){
-			return this.getJsonObject(response.getResponseContent());
+			return StringUtil.getJsonObjectFromString(response.getResponseContent());
 		} else {
 			throw new FOMException("Unable to convert response to json because the content type is "+contentType);
 		}
-	}
-	
-	/**
-	 * Given a string of json code will return an appropriate representation as a JSONObject
-	 * @param jsonInput The string of json code to be turned into a JSONObject instance 
-	 * @return The resulting JSONObject instance
-	 * @throws JSONException If there was a problem processing the jsonInput
-	 */
-	protected JSONObject getJsonObject(String jsonInput) throws JSONException{
-		JSONTokener jsonResultTokener = new JSONTokener(jsonInput);
-		JSONObject jsonResult = new JSONObject(jsonResultTokener);
-		return jsonResult;
-	}
-	
-	/**
-	 * Given a JSONArray (of strings) will return the String[] array representation
-	 * @param input The JSONArray to process
-	 * @return The resulting String[]
-	 * @throws JSONException
-	 */
-	protected String[] getStringArrayFromJSONArray(JSONArray input) throws JSONException {
-		String[] result = new String[input.length()];
-		for(int i=0; i<input.length(); i++) {
-			result[i] = input.getString(i);
-		}
-		return result;
 	}
 }

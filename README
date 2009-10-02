@@ -20,6 +20,89 @@ Currently we have a class (FluidConnector) that facilitates interaction with Flu
 for this class and some other helper classes.
 
 I (ntoll) have partially completed a FOM (Fluid-Object-Mapper) to sit on top of the FluidConnector 
-class. This should be finished soon.
+class.
 
 All feedback, patches, bug-reports are most welcome!
+
+Example usage:
+
+import java.io.IOException;
+import com.fluidinfo.*;
+import com.fluidinfo.fom.*;
+import com.fluidinfo.fom.Object;
+import org.json.*;
+
+public class fluidTest {
+
+    /**
+     * Some example code for using the Fluid Object Model (FOM) classes with 
+     * FluidDB
+     * @throws JSONException 
+     * @throws IOException 
+     * @throws FluidException 
+     * @throws FOMException 
+     */
+    public static void main(String[] args) throws FOMException, FluidException, IOException, JSONException {
+        // The FluidDB class represents the instance of FluidDB you're connecting to.
+        // The default constructor is set to use http://fluiddb.fluidinfo.com/ but we're
+        // passing the URI to the sandbox here.
+        FluidDB fdb = new FluidDB(FluidConnector.SandboxURL);
+        // Login to FluidDB with your credentials
+        String username = "username";
+        String password = "password";
+        fdb.Login(username, password);
+        // Get the User object representing me
+        User u = fdb.getLoggedInUser();
+        // My root namespace
+        Namespace root = u.RootNamespace();
+        // Create a new namespace underneath my root namespace
+        Namespace books = root.createNamespace("books", "For storing tags about books I might be reading.");
+        // Add some tags to the new namespace
+        Tag title = books.createTag("Title", "The title of a book I've read", true);
+        Tag authors = books.createTag("Authors", "The author list", true);
+        Tag hasRead = books.createTag("HasRead", "Indicates I've read this book", true);
+        Tag rating = books.createTag("Rating", "Marks out of ten", true);
+        Tag comment = books.createTag("Comment", "Some notes and commentary", false);
+        
+        // Create a new object
+        Object seven_pillars = fdb.createObject("ISBN:0954641809");
+        // Associate some tag/values with it
+        // The first tag is only associating a tag *not* a value too
+        seven_pillars.tag(hasRead);
+        // We're associating values with the tags
+        seven_pillars.tag(title, "Seven Pillars of Wisdom");
+        seven_pillars.tag(authors, new String[]{"T.E.Lawrence"});
+        seven_pillars.tag(rating, 8);
+        seven_pillars.tag(comment, "The dreamers of the day are dangerous men, for they may act out their dreams with open eyes, to make it possible.");
+        
+        // A search of all objects that I have read 
+        String[] result = fdb.searchObjects("has "+username+"/books/HasRead");
+        // result will contain only one result... the id for the seven_pillars Object
+        // Lets instantiate it and get a list of the available tags I have permission to see
+        Object newObj = fdb.getObject(result[0]);
+        String[] tagPaths = newObj.getTagPaths();
+        // tagPaths will include my tags I created above...
+        // Lets get the first tag and find out what is in it...
+        Tag newTag = fdb.getTag(tagPaths[0]);
+        FluidResponse r = newObj.getTagValue(newTag);
+        // Assuming all is well the result is returned by calling r.getResponseContent(); 
+        // Lets do some cleanup...
+        
+        // Remove the tags from the object that we created to represent the seven pillars
+        newObj.deleteTag(title);
+        newObj.deleteTag(authors);
+        newObj.deleteTag(hasRead);
+        newObj.deleteTag(rating);
+        newObj.deleteTag(comment);
+        
+        // Now delete the tags
+        title.delete();
+        authors.delete();
+        hasRead.delete();
+        rating.delete();
+        comment.delete();
+        
+        // and finally the namespace
+        books.delete();
+    }
+}

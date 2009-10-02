@@ -118,7 +118,6 @@ public class FluidConnector {
         return this.Call(m, path, "");
     }
 
-
     /**
      * Makes a call to FluidDB
      * @param m The type of HTTP method to use 
@@ -131,7 +130,6 @@ public class FluidConnector {
     public FluidResponse Call(Method m, String path, String body) throws FluidException, IOException {
         return this.Call(m, path, body, new Hashtable<String, String>());
     }
-
     
     /**
      * Makes a call to FluidDB
@@ -145,6 +143,22 @@ public class FluidConnector {
      * @throws IOException Will get thrown if we can't extract the errorStream from the connection
      */
     public FluidResponse Call(Method m, String path, String body, Hashtable<String, String> args) throws FluidException, IOException {
+        return this.Call(m, path, body, args, "application/json; charset=utf-8");
+    }
+    
+    /**
+     * Makes a call to FluidDB
+     * @param m The type of HTTP method to use 
+     * @param path The path to call
+     * @param body An optional body to send with the request
+     * @param args A dictionary of arguments to pass with the request
+     * @param content_type The value for the Content-Type header
+     * @return A string version of the result
+     * @throws FluidException If an error occurs, such as no such resource or malformed
+     *         arguments
+     * @throws IOException Will get thrown if we can't extract the errorStream from the connection
+     */
+    public FluidResponse Call(Method m, String path, String body, Hashtable<String, String> args, String content_type) throws FluidException, IOException {   
         // Build the URI we'll be calling
         StringBuffer uri = new StringBuffer();
         uri.append( this.url );
@@ -194,7 +208,7 @@ public class FluidConnector {
                 connection.setRequestProperty("content-type", "text/plain; charset=utf-8");
             } else {
                 byte[] data = body.getBytes("UTF-8");
-                connection.setRequestProperty("content-type", "application/json; charset=utf-8");
+                connection.setRequestProperty("content-type", content_type);
                 connection.setRequestProperty("content-length", new Integer(data.length).toString() );
                 writer = connection.getOutputStream();
                 writer.write(data);

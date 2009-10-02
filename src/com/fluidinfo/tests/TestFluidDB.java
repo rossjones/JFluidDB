@@ -2,11 +2,15 @@ package com.fluidinfo.tests;
 
 import static org.junit.Assert.*;
 import java.io.IOException;
+import java.util.UUID;
+
 import org.junit.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.fluidinfo.*;
 import com.fluidinfo.fom.*;
+import com.fluidinfo.fom.Object;
+import com.fluidinfo.utils.StringUtil;
 
 /**
  * Tests the core FluidDB class
@@ -62,6 +66,15 @@ public class TestFluidDB extends FluidDB{
 		Tag usernameTag = fdb.getTag("fluiddb/users/username");
 		assertEquals("username", usernameTag.getName());
 	}
+	
+	@Test
+	public void testGetLoggedInUser() throws Exception {
+	    FluidDB fdb = new FluidDB(FluidConnector.SandboxURL);
+        assertEquals(FluidConnector.SandboxURL, fdb.getURL());
+	    fdb.Login(this.testUsername, this.testPassword);
+	    User u = fdb.getLoggedInUser();
+	    assertEquals(this.testUsername, u.getName());
+	}
     
     @Test
     public void testGetUser() throws FOMException, FluidException, IOException, JSONException {
@@ -71,9 +84,53 @@ public class TestFluidDB extends FluidDB{
         assertEquals(this.testUsername, user.getName());
         assertEquals(true, user.getId().length()>0);
     }
+    
+    @Test
+    public void testCreateObject() throws FOMException, JSONException, FluidException, IOException {
+        FluidDB fdb = new FluidDB(FluidConnector.SandboxURL);
+        assertEquals(FluidConnector.SandboxURL, fdb.getURL());
+        String about = "jFluidDBUnitTest: "+UUID.randomUUID().toString();
+        Object o = fdb.createObject(about);
+        assertEquals(true, o.getId().length()>0);
+        assertEquals(o.getAbout(), about);
+    }
 	
 	@Test
-	public void testGetObject() {
-		// TODO: Finish
+	public void testGetObject() throws FOMException, FluidException, IOException, JSONException {
+	    FluidDB fdb = new FluidDB(FluidConnector.SandboxURL);
+        assertEquals(FluidConnector.SandboxURL, fdb.getURL());
+        User user = fdb.getUser(this.testUsername);
+        Object o = fdb.getObject(user.getId());
+        assertEquals(user.getId(), o.getId());
+        assertEquals(true, o.getAbout().length()>0);
+        assertEquals(true, o.getTagPaths().length>0);
 	}
+	
+	@Test
+	public void testSearchObjects() throws Exception {
+	    // Lets set up a little scenario we can use to play with
+	    FluidDB fdb = new FluidDB(FluidConnector.SandboxURL);
+        fdb.Login(this.testUsername, this.testPassword);
+        User u = fdb.getLoggedInUser();
+        Namespace root = u.RootNamespace();
+        String tagName = UUID.randomUUID().toString();
+        Tag t = root.createTag(tagName, "For the purposes of testing jFluidDB", true);
+        Object o = fdb.getObject(u.getId());
+        // Lets tag and search
+        o.tag(t, 1);
+        String[] path = {root.getName(), t.getName()};
+        String[] result = fdb.searchObjects(StringUtil.URIJoin(path)+" = 1");
+        assertEquals(1, result.length);
+        assertEquals(o.getId(), result[0]);
+        // clean up
+        o.deleteTag(t);
+        t.delete();
+	}
+	
+	@Test(expected=FluidException.class)
+    public void testSearchObjectsFail() throws FluidException, IOException, JSONException {
+        // Can't get the name from this path
+	    FluidDB fdb = new FluidDB(FluidConnector.SandboxURL);
+	    fdb.searchObjects("/foo/bar = 1");
+    }
 }

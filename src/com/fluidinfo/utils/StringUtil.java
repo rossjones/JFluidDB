@@ -24,6 +24,11 @@ package com.fluidinfo.utils;
 
 import java.util.AbstractCollection;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
 /**
  * Some generic utilities for manipulating strings
  * @author rossjones, ntoll
@@ -73,4 +78,30 @@ public class StringUtil {
 	public static String URIJoin(AbstractCollection<String> s){
 		return StringUtil.URIJoin(s.toArray(new String[0]));
 	}
+	
+	/**
+     * Given a string of json code will return an appropriate representation as a JSONObject
+     * @param jsonInput The string of json code to be turned into a JSONObject instance 
+     * @return The resulting JSONObject instance
+     * @throws JSONException If there was a problem processing the jsonInput
+     */
+    public static JSONObject getJsonObjectFromString(String jsonInput) throws JSONException{
+        JSONTokener jsonResultTokener = new JSONTokener(jsonInput);
+        JSONObject jsonResult = new JSONObject(jsonResultTokener);
+        return jsonResult;
+    }
+    
+    /**
+     * Given a JSONArray (of strings) will return the String[] array representation
+     * @param input The JSONArray to process
+     * @return The resulting String[]
+     * @throws JSONException
+     */
+    public static String[] getStringArrayFromJSONArray(JSONArray input) throws JSONException {
+        String[] result = new String[input.length()];
+        for(int i=0; i<input.length(); i++) {
+            result[i] = input.getString(i);
+        }
+        return result;
+    }
 }

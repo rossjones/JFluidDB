@@ -1,8 +1,13 @@
 package com.fluidinfo.utils.tests;
 
 import static org.junit.Assert.*;
+
 import java.util.Vector;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.*;
+import com.fluidinfo.fom.FOMException;
 import com.fluidinfo.utils.*;
 
 /**
@@ -40,4 +45,21 @@ public class TestStringUtil {
 		assertEquals("/foo/bar/baz", StringUtil.URIJoin(paths)); // make sure it works with a collection
 	}
 	
+	@Test
+    public void testGetStringArrayFromJSONArray() throws JSONException {
+        String jsonInput = "{\"foo\": [ \"bar\", \"baz\"]}";
+        JSONObject jObj = StringUtil.getJsonObjectFromString(jsonInput);
+        String[] result = StringUtil.getStringArrayFromJSONArray(jObj.getJSONArray("foo"));
+        assertEquals(2, result.length);
+        assertEquals("bar", result[0]);
+        assertEquals("baz", result[1]);
+    }
+	
+	@Test
+    public void testGetJsonObjectWorks() throws JSONException, FOMException {
+        // With a single String
+        String jsonInput = "{ \"foo\": \"bar\"}";
+        JSONObject jObj = StringUtil.getJsonObjectFromString(jsonInput);
+        assertEquals("bar", jObj.get("foo"));
+    }
 }
