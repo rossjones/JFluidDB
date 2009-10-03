@@ -20,20 +20,26 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-package com.fluidinfo;
+package com.fluidinfo.fom;
 
-import java.util.AbstractCollection;
-import java.util.Iterator;
+public class FOMException extends Exception {
 
-public class StringUtil {
-
-	public static String join(AbstractCollection<String> s, String delim) {
-	    if (s == null || s.isEmpty()) return "";
-	    
-	    Iterator<String> iter = s.iterator();
-	    StringBuilder sb = new StringBuilder(iter.next());
-	    while( iter.hasNext() )
-	        sb.append(delim).append(iter.next());
-	    return sb.toString();
+	private static final long serialVersionUID = 1L;
+	
+	public FOMException() {
+		super();
 	}
+
+	public FOMException(String message) {
+		super(message);
+	}
+
+	public FOMException(Throwable cause) {
+		super(cause);
+	}
+
+	public FOMException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
 }

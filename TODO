@@ -1,5 +1,5 @@
 The next set of things to do:
 
-- Use FluidConnector as the internal handler for a set of classes that
-  abstract out the required functionality
-- Test on Android ;-)
+- Finish the FOM - permissions and policies
+- Implement getting/setting opaque tag values
+- Attempt to improve the code coverage of the unit tests (currently at 92.7%)
