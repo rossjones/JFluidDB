@@ -1,4 +1,8 @@
-.classpath
-.project
-bin/*
-
+*.dll
+*.pdb
+*.user
+*.suo
+credentials.json
+*/bin/*
+*/obj/*
+*~
